@@ -2,11 +2,13 @@ mod cli;
 mod compiler;
 mod config;
 
-use std::{env, eprintln, process::exit};
+use std::{env, eprintln, path::PathBuf, process::exit};
+
+use crate::cli::CLIArguments;
 
 #[derive(Debug)]
 enum Command {
-    Build,
+    Build(CLIArguments),
 }
 
 fn parse_command() -> Result<Command, String> {
@@ -14,8 +16,23 @@ fn parse_command() -> Result<Command, String> {
     let command_raw = arguments
         .next()
         .ok_or_else(|| "Missing command argument.".to_string())?;
+
+    let mut root = PathBuf::from(".");
+    while let Some(arg) = arguments.next() {
+        match arg.as_str() {
+            "--root" => {
+                let value = arguments
+                    .next()
+                    .ok_or_else(|| "--root requires a path".to_string())?;
+                root = PathBuf::from(value);
+            }
+            unknown => return Err(format!("unknown argument: {unknown}")),
+        }
+    }
+
+    let cli_arguments = CLIArguments { root };
     match command_raw.as_str() {
-        "build" => Ok(Command::Build),
+        "build" => Ok(Command::Build(cli_arguments)),
         _ => Err(format!("Unknown command: {command_raw}")),
     }
 }
@@ -29,7 +46,7 @@ fn main() {
         }
     };
     if let Err(error) = match command {
-        Command::Build => cli::build::run(),
+        Command::Build(arguments) => cli::build::run(arguments),
     } {
         eprintln!("Error: {error}");
         exit(1);
