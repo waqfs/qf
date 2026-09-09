@@ -1,4 +1,6 @@
 mod cli;
+mod compiler;
+mod config;
 
 use std::{env, eprintln, process::exit};
 
