@@ -1,3 +1,5 @@
+mod cli;
+
 use std::{env, eprintln, process::exit};
 
 #[derive(Debug)]
@@ -24,7 +26,10 @@ fn main() {
             exit(1);
         }
     };
-    match command {
-        Command::Build => {}
+    if let Err(error) = match command {
+        Command::Build => cli::build::run(),
+    } {
+        eprintln!("Error: {error}");
+        exit(1);
     }
 }
