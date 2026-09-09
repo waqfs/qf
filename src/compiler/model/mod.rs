@@ -1,2 +1,2 @@
-mod document;
-mod site;
+pub mod document;
+pub mod site;
