@@ -1,3 +1,5 @@
+mod model;
+
 use crate::config::Config;
 use std::path::Path;
 
