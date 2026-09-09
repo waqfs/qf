@@ -1,12 +1,8 @@
-use std::env;
+use std::{env, eprintln, process::exit};
 
 #[derive(Debug)]
 enum Command {
     Build,
-}
-
-fn main() {
-    println!("Hello, world!");
 }
 
 fn parse_command() -> Result<Command, String> {
@@ -17,5 +13,18 @@ fn parse_command() -> Result<Command, String> {
     match command_raw.as_str() {
         "build" => Ok(Command::Build),
         _ => Err(format!("Unknown command: {command_raw}")),
+    }
+}
+
+fn main() {
+    let command = match parse_command() {
+        Ok(command) => command,
+        Err(error) => {
+            eprintln!("Error: {error}");
+            exit(1);
+        }
+    };
+    match command {
+        Command::Build => {}
     }
 }
