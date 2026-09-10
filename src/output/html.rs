@@ -93,6 +93,8 @@ fn write_block(block: &Block, output: &mut String) {
             write_inline(content, output);
             output.push_str(&format!("</h{level}>\n"));
         }
+        Block::UnorderedList(items) => write_list("ul", items, output),
+        Block::OrderedList(items) => write_list("ol", items, output),
         Block::BlockQuote(inlines) => {
             output.push_str("<blockquote><p>");
             write_inline(inlines, output);
@@ -159,6 +161,16 @@ fn write_inline(inlines: &[Inline], output: &mut String) {
             }
         }
     }
+}
+
+fn write_list(tag: &str, items: &[Vec<Inline>], output: &mut String) {
+    output.push_str(&format!("<{tag}>\n"));
+    for item in items {
+        output.push_str("<li>");
+        write_inline(item, output);
+        output.push_str("</li>\n");
+    }
+    output.push_str(&format!("</{tag}>\n"));
 }
 
 fn html_escape(value: &str) -> String {
