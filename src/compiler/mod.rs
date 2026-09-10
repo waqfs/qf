@@ -1,8 +1,14 @@
+pub mod index;
 pub mod model;
 pub mod source;
 
-use crate::{compiler::model::document::Site, config::Config, output::outputs, parser, staging};
-use std::path::Path;
+use crate::{
+    compiler::{index::build_index, model::document::Site},
+    config::Config,
+    output::outputs,
+    parser, staging,
+};
+use std::{collections::BTreeMap, path::Path, println};
 
 pub fn build(root: &Path) -> Result<(), String> {
     let (config, site) = compile(root)?;
@@ -30,5 +36,6 @@ fn compile(root: &Path) -> Result<(Config, Site), String> {
         }
     }
 
-    std::process::exit(1);
+    let site = build_index(root, config.clone(), documents)?;
+    Ok((config, site))
 }
