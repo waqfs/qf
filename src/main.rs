@@ -1,6 +1,7 @@
 mod cli;
 mod compiler;
 mod config;
+mod output;
 mod parser;
 mod staging;
 
