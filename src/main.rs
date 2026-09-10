@@ -2,6 +2,7 @@ mod cli;
 mod compiler;
 mod config;
 mod parser;
+mod staging;
 
 use std::{env, eprintln, path::PathBuf, process::exit};
 
