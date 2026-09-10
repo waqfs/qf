@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Block, Document},
+        site::{Block, Document, ImageAlt, Inline},
     },
     config::Config,
     output::OutputFormatter,
@@ -85,7 +85,81 @@ fn write_head(document: &Document, config: &Config, output: &mut String) {
     output.push_str("</head>\n");
 }
 
-fn write_block(block: &Block, output: &mut String) {}
+fn write_block(block: &Block, output: &mut String) {
+    match block {
+        Block::Heading { level, content } => {
+            let level = level + 1;
+            output.push_str(&format!("<h{level}>"));
+            write_inline(content, output);
+            output.push_str(&format!("</h{level}>\n"));
+        }
+        Block::BlockQuote(inlines) => {
+            output.push_str("<blockquote><p>");
+            write_inline(inlines, output);
+            output.push_str("</p></blockquote>\n");
+        }
+        Block::CodeBlock { language, code } => {
+            output.push_str("<pre><code");
+            if let Some(language) = language {
+                output.push_str(&format!(
+                    " class=\"language-{}\"",
+                    html_escape_attribute(language)
+                ));
+            }
+            output.push('>');
+            output.push_str(&html_escape(code));
+            output.push_str("</code></pre>\n");
+        }
+        Block::Image(image) => {
+            output.push_str("<figure>\n");
+            let alt = match &image.alt {
+                ImageAlt::Description(value) => value.as_str(),
+                ImageAlt::Decorative => "",
+            };
+            output.push_str(&format!(
+                "<img src=\"{}\" alt=\"{}\" loading=\"lazy\">\n",
+                html_escape_attribute(&format!("/{}", image.source.trim_start_matches('/'))),
+                html_escape_attribute(alt)
+            ));
+            if let Some(caption) = &image.caption {
+                output.push_str(&format!(
+                    "<figcaption>{}</figcaption>\n",
+                    html_escape(caption)
+                ));
+            }
+            output.push_str("</figure>\n");
+        }
+        Block::Paragraph(inlines) => {
+            output.push_str("<p>");
+            write_inline(inlines, output);
+            output.push_str("</p>\n");
+        }
+    }
+}
+
+fn write_inline(inlines: &[Inline], output: &mut String) {
+    for inline in inlines {
+        match inline {
+            Inline::Text(text) => output.push_str(&html_escape(text)),
+            Inline::Emphasis(text) => {
+                output.push_str("<em>");
+                write_inline(text, output);
+                output.push_str("</em>");
+            }
+            Inline::Strong(text) => {
+                output.push_str("<strong>");
+                write_inline(text, output);
+                output.push_str("</strong>");
+            }
+            Inline::Code(code) => output.push_str(&format!("<code>{}</code>", html_escape(&code))),
+            Inline::Link { label, href } => {
+                output.push_str(&format!("<a href=\"{}\">", html_escape_attribute(&href)));
+                write_inline(label, output);
+                output.push_str("</a>");
+            }
+        }
+    }
+}
 
 fn html_escape(value: &str) -> String {
     value
