@@ -153,7 +153,7 @@ fn line_starts_block(line: &str) -> bool {
         || line.starts_with("> ")
         || line.starts_with("@image ")
         || line.starts_with("```")
-        || line_starts_block(line)
+        || line_is_ordered_list(line)
 }
 
 fn line_is_ordered_list(line: &str) -> bool {
