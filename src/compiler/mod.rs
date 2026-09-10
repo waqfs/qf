@@ -1,11 +1,17 @@
 pub mod model;
 pub mod source;
 
-use crate::{compiler::model::document::Site, config::Config, parser};
+use crate::{compiler::model::document::Site, config::Config, parser, staging};
 use std::path::Path;
 
 pub fn build(root: &Path) -> Result<(), String> {
-    compile(root);
+    let (config, site) = compile(root)?;
+    let stage = staging::init_stage(root, &config)?;
+
+    // Build output files
+    // ---
+
+    staging::commit_stage(root, &config, &stage)?;
     Ok(())
 }
 
