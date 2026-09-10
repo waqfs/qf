@@ -9,6 +9,9 @@ pub struct Config {
     pub base_url: String,
     pub stylesheet: Option<PathBuf>,
 
+    #[serde(default = "default_language")]
+    pub language: String,
+
     #[serde(default = "default_content_dir")]
     pub content_dir: PathBuf,
 
@@ -17,6 +20,10 @@ pub struct Config {
 
     #[serde(default = "default_static_dir")]
     pub static_dir: PathBuf,
+}
+
+fn default_language() -> String {
+    "en".to_string()
 }
 
 fn default_content_dir() -> PathBuf {
@@ -33,7 +40,7 @@ fn default_static_dir() -> PathBuf {
 
 impl Config {
     pub fn load(root: &Path) -> Result<Self, String> {
-        let path = root.join("waqfs.conf.json");
+        let path = root.join("qf.config.json");
         let raw =
             fs::read_to_string(&path).map_err(|e| format!("Failed to read config file: {}", e))?;
         let config: Config = serde_json::from_str(&raw)
