@@ -26,10 +26,12 @@ impl OutputFormatter for TextOutputFormatter {
             text.push_str(&document.metadata.title.to_uppercase());
             text.push('\n');
             text.push_str(&"=".repeat(document.metadata.title.chars().count()));
-            text.push_str("\n\n");
+            text.push('\n');
             if let Some(summary) = &document.metadata.summary {
                 text.push_str(summary);
                 text.push_str("\n\n");
+            } else {
+                text.push('\n');
             }
             for block in &document.blocks {
                 write_block(block, &mut text);
@@ -50,7 +52,7 @@ fn write_block(block: &Block, output: &mut String) {
             output.push_str(&heading);
             output.push('\n');
             output.push_str(&if *level == 1 { "-" } else { "~" }.repeat(heading.chars().count()));
-            output.push_str("\n\n");
+            output.push_str("\n");
         }
         Block::UnorderedList(items) => {
             for item in items {
@@ -74,8 +76,14 @@ fn write_block(block: &Block, output: &mut String) {
             output.push_str("\n\n");
         }
         Block::CodeBlock { language, code } => {
-            for line in code.lines() {
-                output.push_str("    ");
+            if let Some(language) = &language {
+                output.push_str("[");
+                output.push_str(language);
+                output.push_str("]\n");
+            }
+            let width = code.lines().count().to_string().len();
+            for (index, line) in code.lines().enumerate() {
+                output.push_str(&format!("{:>width$} | ", index + 1));
                 output.push_str(line);
                 output.push('\n');
             }
@@ -83,7 +91,7 @@ fn write_block(block: &Block, output: &mut String) {
         }
         Block::Image(image) => {
             if let ImageAlt::Description(alt) = &image.alt {
-                output.push_str("[Image: ]");
+                output.push_str("[Image: ");
                 output.push_str(alt);
                 output.push_str("] @ ");
                 output.push_str(&image.source);

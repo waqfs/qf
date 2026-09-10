@@ -13,12 +13,14 @@ pub fn parse(input: &str) -> Vec<Inline> {
             if let Some(label_end) = link.find("](") {
                 if let Some(url_end) = link[label_end + 2..].find(')') {
                     let label = &link[1..label_end];
-                    let url = &link[label_end + 2..label_end + 2 + url_end];
+                    let start = label_end + 2;
+                    let end = start + url_end;
+                    let url = &link[start..end];
                     nodes.push(Inline::Link {
                         label: parse_styles(label),
                         href: url.to_string(),
                     });
-                    rest = &link[url_end + 1..];
+                    rest = &link[end + 1..];
                     continue;
                 }
             }
