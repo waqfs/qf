@@ -1,6 +1,7 @@
 mod cli;
 mod compiler;
 mod config;
+mod parser;
 
 use std::{env, eprintln, path::PathBuf, process::exit};
 
