@@ -21,6 +21,8 @@ pub struct Document {
     pub metadata: Metadata,
     pub route: String,
     pub blocks: Vec<Block>,
+    pub previous: Option<String>,
+    pub next: Option<String>,
 }
 
 #[derive(Debug, Clone)]

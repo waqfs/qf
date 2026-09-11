@@ -3,7 +3,10 @@ pub mod model;
 pub mod source;
 
 use crate::{
-    compiler::{index::build_index, model::document::Site},
+    compiler::{
+        index::{build_index, sort_index},
+        model::document::Site,
+    },
     config::Config,
     output::outputs,
     parser, staging,
@@ -37,6 +40,7 @@ fn compile(root: &Path) -> Result<(Config, Site), String> {
         }
     }
 
-    let site = build_index(root, config.clone(), documents)?;
+    let mut site: Site = build_index(root, config.clone(), documents)?;
+    sort_index(&mut site);
     Ok((config, site))
 }

@@ -13,5 +13,7 @@ pub fn parse_document(file: &PortfolioFile) -> Result<Document, String> {
         metadata: metadata,
         route: String::new(),
         blocks: blocks,
+        previous: None,
+        next: None,
     })
 }

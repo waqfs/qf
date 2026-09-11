@@ -42,6 +42,25 @@ pub fn build_index(
     })
 }
 
+pub fn sort_index(site: &mut Site) {
+    site.articles.sort_by(|a, b| {
+        let first_date = site.documents[*a].metadata.date.as_deref().unwrap_or("");
+        let second_date = site.documents[*b].metadata.date.as_deref().unwrap_or("");
+        first_date.cmp(second_date)
+    });
+
+    let routes: Vec<String> = site
+        .articles
+        .iter()
+        .map(|index| site.documents[*index].route.clone())
+        .collect();
+
+    for (pos, index) in site.articles.clone().into_iter().enumerate() {
+        site.documents[index].previous = pos.checked_sub(1).map(|p| routes[p].clone());
+        site.documents[index].next = routes.get(pos + 1).cloned();
+    }
+}
+
 fn route(document: &Document, root: &Path, config: &Config) -> String {
     let content_root = root.join(&config.content_dir);
     let relative = document
