@@ -6,8 +6,9 @@ use std::{
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
+    pub title: String,
     pub base_url: String,
-    pub stylesheet: Option<PathBuf>,
+    pub stylesheet: Option<String>,
 
     #[serde(default = "default_language")]
     pub language: String,

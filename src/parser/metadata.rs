@@ -8,6 +8,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
     let mut title: Option<String> = None;
     let mut summary: Option<String> = None;
     let mut date: Option<String> = None;
+    let mut author: Option<String> = None;
     let mut index: usize = 0;
 
     while index < lines.len() {
@@ -48,6 +49,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
             "title" => title = Some(value.trim().to_string()),
             "summary" => summary = Some(value.trim().to_string()),
             "date" => date = Some(value.trim().to_string()),
+            "author" => author = Some(value.trim().to_string()),
             unknown => {
                 return Err(format!(
                     "Unknown metadata property {unknown} in {}",
@@ -75,6 +77,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
             })?,
             summary,
             date,
+            author,
         },
         index,
     ))

@@ -35,8 +35,13 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     write_head(document, config, &mut body);
     body.push_str("<body>\n");
 
-    body.push_str("<div id=\"content\">");
-    body.push_str("<main>\n");
+    body.push_str("<a class=\"skip-link\" href=\"#content\">Skip to content</a>\n");
+    body.push_str(&format!(
+        "<header><a href=\"/\">{}</a></header>\n",
+        &site.config.title
+    ));
+
+    body.push_str("<main id=\"content\">\n");
     body.push_str("<article>\n");
     body.push_str("<header>\n");
     body.push_str(&format!(
@@ -44,7 +49,7 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
         html_escape(&document.metadata.title)
     ));
     if let Some(summary) = &document.metadata.summary {
-        body.push_str(&format!("<p>{}</p>\n", html_escape(summary)));
+        body.push_str(&format!("\n<p>{}</p>\n", html_escape(summary)));
     }
     if let Some(date) = &document.metadata.date {
         body.push_str(&format!(
@@ -52,6 +57,9 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
             html_escape_attribute(date),
             html_escape(date)
         ));
+    }
+    if let Some(author) = &document.metadata.author {
+        body.push_str(&format!("<p class=\"author\">{}</p>\n", author));
     }
     body.push_str("</header>\n");
     for block in &document.blocks {
@@ -77,7 +85,6 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
 
     body.push_str("</article>\n");
     body.push_str("</main>\n");
-    body.push_str("</div>\n");
 
     body.push_str("</body>\n");
     body.push_str("</html>\n");
@@ -91,15 +98,37 @@ fn write_head(document: &Document, config: &Config, output: &mut String) {
     output.push_str("<meta charset=\"utf-8\">\n");
     output.push_str("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
     output.push_str("<meta name=\"color-scheme\" content=\"light dark\">\n");
-    output.push_str(&format!("<title>{}</title>\n", "placeholder"));
+    output.push_str(&format!(
+        "<title>{}</title>\n",
+        html_escape(&document.metadata.title)
+    ));
     output.push_str(&format!(
         "<meta name=\"description\" content=\"{}\">\n",
-        "plaecholder"
+        html_escape_attribute(
+            document
+                .metadata
+                .summary
+                .as_deref()
+                .unwrap_or(&document.metadata.title)
+        )
     ));
     output.push_str(&format!(
-        "<link rel=\"stylesheet\" href=\"{}\">\n",
-        "placeholder"
+        "<link rel=\"canonical\" href=\"{}{}\">\n",
+        config.base_url, document.route
     ));
+    if let Some(path) = &config.stylesheet {
+        output.push_str(&format!(
+            "<link rel=\"stylesheet\" href=\"{}\">\n",
+            html_escape_attribute(path)
+        ));
+    }
+    output.push_str("<link rel=\"alternate\" type=\"text/plain\" href=\"index.txt\">\n");
+    if let Some(path) = &document.previous {
+        output.push_str(&format!("<link rel=\"prev\" href=\"{}\">", path));
+    }
+    if let Some(path) = &document.next {
+        output.push_str(&format!("<link rel=\"next\" href=\"{}\">", path));
+    }
     output.push_str("</head>\n");
 }
 

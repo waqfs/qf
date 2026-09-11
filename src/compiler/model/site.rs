@@ -13,6 +13,7 @@ pub struct Metadata {
     pub title: String,
     pub summary: Option<String>,
     pub date: Option<String>,
+    pub author: Option<String>,
 }
 
 #[derive(Debug, Clone)]
