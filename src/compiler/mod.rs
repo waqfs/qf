@@ -18,6 +18,7 @@ pub fn build(root: &Path) -> Result<(), String> {
         output.write(&site, &config, &stage)?;
     }
 
+    staging::insert_static(root, &config, &stage)?;
     staging::commit_stage(root, &config, &stage)?;
     Ok(())
 }

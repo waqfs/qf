@@ -31,3 +31,31 @@ pub fn commit_stage(root: &Path, config: &Config, path: &Path) -> Result<(), Str
         .map_err(|e| format!("Staging directory failed to be renamed to output directory. {e}"))?;
     Ok(())
 }
+
+pub fn insert_static(root: &Path, config: &Config, stage: &Path) -> Result<(), String> {
+    let src = root.join(&config.static_dir);
+    if src.exists() {
+        copy_dir(&src, stage)?;
+    }
+    Ok(())
+}
+
+fn copy_dir(src: &Path, dest: &Path) -> Result<(), String> {
+    fs::create_dir_all(dest)
+        .map_err(|e| format!("Copy destination directory could not be created. {e}"))?;
+    for file in fs::read_dir(src)
+        .map_err(|e| format!("Could not read file in directory {}: {e}", src.display()))?
+    {
+        let file =
+            file.map_err(|e| format!("An error occurred reading file {}: {e}", src.display()))?;
+        let from = file.path();
+        let to = dest.join(file.file_name());
+        if from.is_dir() {
+            copy_dir(&from, &to)?;
+        } else {
+            fs::copy(from, to)
+                .map_err(|e| format!("An error occurred copying files to directory: {e}"))?;
+        }
+    }
+    Ok(())
+}
