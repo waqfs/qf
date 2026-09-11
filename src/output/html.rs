@@ -57,6 +57,24 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     for block in &document.blocks {
         write_block(block, &mut body);
     }
+
+    if document.previous.is_some() || document.next.is_some() {
+        body.push_str("<nav aria-label=\"navigation\">\n");
+        if let Some(route) = &document.previous {
+            body.push_str(&format!(
+                "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
+                html_escape_attribute(route)
+            ));
+        }
+        if let Some(route) = &document.next {
+            body.push_str(&format!(
+                "<a rel=\"next\" href=\"{}\">Next</a>\n",
+                html_escape_attribute(route)
+            ));
+        }
+        body.push_str("</nav>\n");
+    }
+
     body.push_str("</article>\n");
     body.push_str("</main>\n");
     body.push_str("</div>\n");

@@ -37,6 +37,13 @@ impl OutputFormatter for TextOutputFormatter {
                 write_block(block, &mut text);
             }
 
+            if let Some(route) = &document.previous {
+                text.push_str(&format!("Previous: {}", route));
+            }
+            if let Some(route) = &document.next {
+                text.push_str(&format!("Next: {}", route));
+            }
+
             fs::write(dir.join("index.txt"), text)
                 .map_err(|e| format!("Failed to write file: {e}"))?;
         }
