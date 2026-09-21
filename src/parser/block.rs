@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::{
-    compiler::model::site::{Block, Image, ImageAlt},
+    compiler::model::site::{Block, DocumentType, Image, ImageAlt, LinkedIndex},
     parser::inline,
 };
 
@@ -14,6 +14,17 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
         let trimmed = line.trim();
 
         if trimmed.is_empty() {
+            index += 1;
+            continue;
+        }
+
+        // Linked Indexes
+        if line_is_linked_index(trimmed).is_some() {
+            blocks.push(Block::LinkedIndex(parse_linked_index(
+                path,
+                index + 1,
+                trimmed,
+            )?));
             index += 1;
             continue;
         }
@@ -170,4 +181,16 @@ fn parse_image_property(line: &str, key: &str) -> Option<String> {
     } else {
         None
     }
+}
+
+fn line_is_linked_index(line: &str) -> Option<DocumentType> {
+    match line.split_whitespace().next()? {
+        "@projects" => Some(DocumentType::Project),
+        "@articles" => Some(DocumentType::Article),
+        _ => None,
+    }
+}
+
+fn parse_linked_index(path: &Path, line: usize, text: &str) -> Result<LinkedIndex, String> {
+    Err("stub".to_string())
 }

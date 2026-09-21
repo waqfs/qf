@@ -16,6 +16,13 @@ pub struct Metadata {
     pub author: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MetadataFields {
+    Title,
+    Summary,
+    Date,
+}
+
 #[derive(Debug, Clone)]
 pub struct Document {
     pub source_path: PathBuf,
@@ -41,6 +48,7 @@ pub enum Block {
         code: String,
     },
     Image(Image),
+    LinkedIndex(LinkedIndex),
 }
 
 #[derive(Debug, Clone)]
@@ -63,4 +71,13 @@ pub enum Inline {
     Strong(Vec<Inline>),
     Code(String),
     Link { label: Vec<Inline>, href: String },
+}
+
+#[derive(Debug, Clone)]
+pub struct LinkedIndex {
+    pub doc_type: DocumentType,
+    pub limit: Option<usize>,
+    pub starred: Option<bool>,
+    pub fields: Vec<MetadataFields>,
+    pub items: Vec<Vec<Inline>>,
 }
