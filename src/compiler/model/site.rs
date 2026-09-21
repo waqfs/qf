@@ -14,6 +14,7 @@ pub struct Metadata {
     pub summary: Option<String>,
     pub date: Option<String>,
     pub author: Option<String>,
+    pub starred: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
