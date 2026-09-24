@@ -1,9 +1,9 @@
-use std::{collections::BTreeMap, path::Path};
+use std::{collections::BTreeMap, path::Path, process::exit, usize};
 
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Document, DocumentType},
+        site::{Block, Document, DocumentType, Inline, LinkedIndex, MetadataFields},
     },
     config::Config,
 };
@@ -42,7 +42,7 @@ pub fn build_index(
     })
 }
 
-pub fn sort_index(site: &mut Site) {
+pub fn process_index(site: &mut Site) {
     site.articles.sort_by(|a, b| {
         let first_date = site.documents[*a].metadata.date.as_deref().unwrap_or("");
         let second_date = site.documents[*b].metadata.date.as_deref().unwrap_or("");
@@ -59,6 +59,79 @@ pub fn sort_index(site: &mut Site) {
         site.documents[index].previous = pos.checked_sub(1).map(|p| routes[p].clone());
         site.documents[index].next = routes.get(pos + 1).cloned();
     }
+
+    for index in 0..site.documents.len() {
+        let blocks: Vec<(usize, Vec<Vec<Inline>>)> = site.documents[index]
+            .blocks
+            .iter()
+            .enumerate()
+            .filter_map(|(pos, block)| match block {
+                Block::LinkedIndex(linked_index) => {
+                    Some((pos, build_local_index(site, linked_index)))
+                }
+                _ => None,
+            })
+            .collect();
+        for (pos, items) in blocks {
+            if let Block::LinkedIndex(linked_index) = &mut site.documents[index].blocks[pos] {
+                linked_index.items = items;
+            }
+        }
+    }
+}
+
+fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
+    let mut documents: Vec<&Document> = site
+        .documents
+        .iter()
+        .filter(|document| {
+            index
+                .starred
+                .map_or(true, |starred| document.metadata.starred == starred)
+        })
+        .collect();
+
+    documents.sort_by(|a, b| {
+        b.metadata
+            .date
+            .as_deref()
+            .unwrap_or("")
+            .cmp(a.metadata.date.as_deref().unwrap_or(""))
+            .then_with(|| a.route.cmp(&b.route))
+    });
+
+    documents
+        .into_iter()
+        .take(index.limit.unwrap_or(usize::MAX))
+        .map(|document| {
+            let mut item = Vec::new();
+            for field in &index.fields {
+                let value: Option<Inline> = match field {
+                    MetadataFields::Title => Some(Inline::Link {
+                        label: vec![Inline::Text(document.metadata.title.clone())],
+                        href: document.route.clone(),
+                    }),
+                    MetadataFields::Summary => document
+                        .metadata
+                        .summary
+                        .as_ref()
+                        .map(|v| Inline::Text(v.clone())),
+                    MetadataFields::Date => document
+                        .metadata
+                        .date
+                        .as_ref()
+                        .map(|v| Inline::Text(v.clone())),
+                };
+                if let Some(value) = value {
+                    if !item.is_empty() {
+                        item.push(Inline::Text(" - ".into()));
+                    }
+                    item.push(value);
+                }
+            }
+            item
+        })
+        .collect()
 }
 
 fn route(document: &Document, root: &Path, config: &Config) -> String {
