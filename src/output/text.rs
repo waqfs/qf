@@ -3,7 +3,10 @@ use std::{fs, path::Path};
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Block, ImageAlt, Inline},
+        site::{
+            Block::{self},
+            ImageAlt, Inline,
+        },
     },
     config::Config,
     output::OutputFormatter,
@@ -69,7 +72,8 @@ fn write_block(block: &Block, output: &mut String) {
             }
             output.push('\n');
         }
-        Block::OrderedList(items) => {
+        Block::LinkedIndex(crate::compiler::model::site::LinkedIndex { items, .. })
+        | Block::OrderedList(items) => {
             for (index, item) in items.iter().enumerate() {
                 output.push_str(&format!("{}. ", index + 1));
                 write_inlines(item, output);

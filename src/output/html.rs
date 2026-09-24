@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Block, Document, ImageAlt, Inline},
+        site::{Block, Document, DocumentType, ImageAlt, Inline, LinkedIndex},
     },
     config::Config,
     output::OutputFormatter,
@@ -183,6 +183,7 @@ fn write_block(block: &Block, output: &mut String) {
             write_inline(inlines, output);
             output.push_str("</p>\n");
         }
+        Block::LinkedIndex(index) => write_index(index, output),
     }
 }
 
@@ -218,6 +219,21 @@ fn write_list(tag: &str, items: &[Vec<Inline>], output: &mut String) {
         output.push_str("</li>\n");
     }
     output.push_str(&format!("</{tag}>\n"));
+}
+
+fn write_index(index: &LinkedIndex, output: &mut String) {
+    let class = match index.doc_type {
+        DocumentType::Project => " project",
+        DocumentType::Article => " article",
+        _ => "",
+    };
+    output.push_str(&format!("<ol class=\"index{class}\">"));
+    for item in &index.items {
+        output.push_str("<li>");
+        write_inline(item, output);
+        output.push_str("</li>\n");
+    }
+    output.push_str("</ol>\n");
 }
 
 fn html_escape(value: &str) -> String {
