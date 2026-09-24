@@ -1,7 +1,7 @@
-use std::path::Path;
+use std::{collections::BTreeSet, path::Path};
 
 use crate::{
-    compiler::model::site::{Block, DocumentType, Image, ImageAlt, LinkedIndex},
+    compiler::model::site::{Block, DocumentType, Image, ImageAlt, LinkedIndex, MetadataFields},
     parser::inline,
 };
 
@@ -20,11 +20,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
 
         // Linked Indexes
         if line_is_linked_index(trimmed).is_some() {
-            blocks.push(Block::LinkedIndex(parse_linked_index(
-                path,
-                index + 1,
-                trimmed,
-            )?));
+            blocks.push(Block::LinkedIndex(parse_linked_index(trimmed)?));
             index += 1;
             continue;
         }
@@ -191,6 +187,55 @@ fn line_is_linked_index(line: &str) -> Option<DocumentType> {
     }
 }
 
-fn parse_linked_index(path: &Path, line: usize, text: &str) -> Result<LinkedIndex, String> {
-    Err("stub".to_string())
+fn parse_linked_index(text: &str) -> Result<LinkedIndex, String> {
+    let mut index = LinkedIndex::new(line_is_linked_index(text).unwrap());
+    let mut visited: BTreeSet<&str> = BTreeSet::new();
+
+    for option in text.split_whitespace().skip(1) {
+        let (key, value) = option
+            .split_once('=')
+            .ok_or_else(|| format!("expected key=value for {option}"))?;
+
+        if !visited.insert(key) {
+            return Err(format!("duplicate key {key}"));
+        }
+
+        match key {
+            "limit" => {
+                if value.is_empty() || !value.chars().all(|chr| chr.is_ascii_digit()) {
+                    return Err(format!("key 'limit' requires positive integer"));
+                }
+                index.limit = Some(
+                    value
+                        .parse()
+                        .map_err(|err| format!("key 'limit' failed to parse integer: {err}"))?,
+                );
+            }
+            "starred" => {
+                index.starred = Some(match value {
+                    "true" => true,
+                    "false" => false,
+                    unknown => return Err(format!("key 'starred' has unknown value {unknown}")),
+                })
+            }
+            "fields" => {
+                index.fields.clear();
+                for field in value.split(',') {
+                    let field = match field {
+                        "title" => MetadataFields::Title,
+                        "summary" => MetadataFields::Summary,
+                        "date" => MetadataFields::Date,
+                        unknown => return Err(format!("key 'fields' has unknown value {unknown}")),
+                    };
+                    if index.fields.contains(&field) {
+                        return Err(format!("key 'fields' has duplicate value"));
+                    }
+                    index.fields.push(field);
+                }
+            }
+            unknown => return Err(format!("unknown option key '{unknown}'")),
+        }
+    }
+
+    Ok(index)
 }

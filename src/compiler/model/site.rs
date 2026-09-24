@@ -82,3 +82,19 @@ pub struct LinkedIndex {
     pub fields: Vec<MetadataFields>,
     pub items: Vec<Vec<Inline>>,
 }
+
+impl LinkedIndex {
+    pub fn new(doc_type: DocumentType) -> Self {
+        Self {
+            doc_type,
+            limit: None,
+            starred: None,
+            fields: vec![
+                MetadataFields::Title,
+                MetadataFields::Summary,
+                MetadataFields::Date,
+            ],
+            items: Vec::new(),
+        }
+    }
+}
