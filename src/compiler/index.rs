@@ -59,6 +59,10 @@ pub fn process_index(site: &mut Site) {
         site.documents[index].previous = pos.checked_sub(1).map(|p| routes[p].clone());
         site.documents[index].next = routes.get(pos + 1).cloned();
     }
+    for (pos, index) in site.projects.clone().into_iter().enumerate() {
+        site.documents[index].previous = pos.checked_sub(1).map(|p| routes[p].clone());
+        site.documents[index].next = routes.get(pos + 1).cloned();
+    }
 
     for index in 0..site.documents.len() {
         let blocks: Vec<(usize, Vec<Vec<Inline>>)> = site.documents[index]
