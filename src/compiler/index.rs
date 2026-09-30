@@ -16,6 +16,8 @@ pub fn build_index(
     let mut routes = BTreeMap::new();
     let mut articles = Vec::new();
     let mut projects = Vec::new();
+    let mut article_index: Option<usize> = None;
+    let mut project_index: Option<usize> = None;
 
     for (index, document) in documents.iter_mut().enumerate() {
         document.route = route(document, root, &config);
@@ -26,10 +28,18 @@ pub fn build_index(
             ));
         }
 
-        match document.metadata.doc_type {
-            DocumentType::Article => articles.push(index),
-            DocumentType::Project => projects.push(index),
-            DocumentType::Page => {}
+        if document.metadata.is_index {
+            match document.metadata.doc_type {
+                DocumentType::Article => article_index = Some(index),
+                DocumentType::Project => project_index = Some(index),
+                DocumentType::Page => {}
+            }
+        } else {
+            match document.metadata.doc_type {
+                DocumentType::Article => articles.push(index),
+                DocumentType::Project => projects.push(index),
+                DocumentType::Page => {}
+            }
         }
     }
 
@@ -39,6 +49,8 @@ pub fn build_index(
         routes,
         articles,
         projects,
+        article_index,
+        project_index,
     })
 }
 
@@ -67,12 +79,18 @@ pub fn process_index(site: &mut Site) {
         .collect();
 
     for (pos, index) in site.articles.clone().into_iter().enumerate() {
-        site.documents[index].previous = pos.checked_sub(1).map(|p| article_routes[p].clone());
         site.documents[index].next = article_routes.get(pos + 1).cloned();
+        site.documents[index].all = site.article_index.map_or(None, |all_index| {
+            Some(site.documents[all_index].route.clone())
+        });
+        site.documents[index].previous = pos.checked_sub(1).map(|p| article_routes[p].clone());
     }
     for (pos, index) in site.projects.clone().into_iter().enumerate() {
-        site.documents[index].previous = pos.checked_sub(1).map(|p| project_routes[p].clone());
         site.documents[index].next = project_routes.get(pos + 1).cloned();
+        site.documents[index].all = site.project_index.map_or(None, |all_index| {
+            Some(site.documents[all_index].route.clone())
+        });
+        site.documents[index].previous = pos.checked_sub(1).map(|p| project_routes[p].clone());
     }
 
     for index in 0..site.documents.len() {

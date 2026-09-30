@@ -43,6 +43,9 @@ impl OutputFormatter for TextOutputFormatter {
             if let Some(route) = &document.next {
                 text.push_str(&format!("Next: {}\n", route));
             }
+            if let Some(route) = &document.all {
+                text.push_str(&format!("All: {}\n", route));
+            }
             if let Some(route) = &document.previous {
                 text.push_str(&format!("Previous: {}\n", route));
             }

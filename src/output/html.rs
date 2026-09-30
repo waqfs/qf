@@ -74,6 +74,12 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
                 html_escape_attribute(route)
             ));
         }
+        if let Some(route) = &document.all {
+            body.push_str(&format!(
+                "<a href=\"{}\">All</a>\n",
+                html_escape_attribute(route)
+            ));
+        }
         if let Some(route) = &document.previous {
             body.push_str(&format!(
                 "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
