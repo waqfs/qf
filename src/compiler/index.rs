@@ -115,12 +115,12 @@ fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
                         .metadata
                         .summary
                         .as_ref()
-                        .map(|v| Inline::Text(v.clone())),
+                        .map(|v| Inline::Span(v.clone())),
                     MetadataFields::Date => document
                         .metadata
                         .date
                         .as_ref()
-                        .map(|v| Inline::Text(v.clone())),
+                        .map(|v| Inline::Span(v.clone())),
                 };
                 if let Some(value) = value {
                     if !item.is_empty() {

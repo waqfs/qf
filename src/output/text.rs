@@ -124,7 +124,7 @@ fn write_block(block: &Block, output: &mut String) {
 fn write_inlines(inlines: &[Inline], output: &mut String) {
     for inline in inlines {
         match inline {
-            Inline::Text(text) | Inline::Code(text) => output.push_str(text),
+            Inline::Text(text) | Inline::Span(text) | Inline::Code(text) => output.push_str(text),
             Inline::Emphasis(text) | Inline::Strong(text) => write_inlines(text, output),
             Inline::Link { label, href } => {
                 write_inlines(label, output);

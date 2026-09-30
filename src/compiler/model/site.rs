@@ -68,6 +68,7 @@ pub enum ImageAlt {
 #[derive(Debug, Clone)]
 pub enum Inline {
     Text(String),
+    Span(String),
     Emphasis(Vec<Inline>),
     Strong(Vec<Inline>),
     Code(String),

@@ -191,6 +191,7 @@ fn write_inline(inlines: &[Inline], output: &mut String) {
     for inline in inlines {
         match inline {
             Inline::Text(text) => output.push_str(&html_escape(text)),
+            Inline::Span(text) => output.push_str(&format!("<span>{}</span>", html_escape(text))),
             Inline::Emphasis(text) => {
                 output.push_str("<em>");
                 write_inline(text, output);
