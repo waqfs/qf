@@ -85,9 +85,15 @@ pub fn process_index(site: &mut Site) {
 }
 
 fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
-    let mut documents: Vec<&Document> = site
-        .documents
+    let indexed_documents = match index.doc_type {
+        DocumentType::Article => &site.articles,
+        DocumentType::Project => &site.projects,
+        DocumentType::Page => return Vec::new(),
+    };
+
+    let mut documents: Vec<&Document> = indexed_documents
         .iter()
+        .map(|index| &site.documents[*index])
         .filter(|document| {
             index
                 .starred
