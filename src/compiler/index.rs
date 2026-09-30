@@ -48,20 +48,31 @@ pub fn process_index(site: &mut Site) {
         let second_date = site.documents[*b].metadata.date.as_deref().unwrap_or("");
         first_date.cmp(second_date)
     });
+    site.projects.sort_by(|a, b| {
+        let first_date = site.documents[*a].metadata.date.as_deref().unwrap_or("");
+        let second_date = site.documents[*b].metadata.date.as_deref().unwrap_or("");
+        first_date.cmp(second_date)
+    });
 
-    let routes: Vec<String> = site
+    let article_routes: Vec<String> = site
         .articles
         .iter()
         .map(|index| site.documents[*index].route.clone())
         .collect();
 
+    let project_routes: Vec<String> = site
+        .projects
+        .iter()
+        .map(|index| site.documents[*index].route.clone())
+        .collect();
+
     for (pos, index) in site.articles.clone().into_iter().enumerate() {
-        site.documents[index].previous = pos.checked_sub(1).map(|p| routes[p].clone());
-        site.documents[index].next = routes.get(pos + 1).cloned();
+        site.documents[index].previous = pos.checked_sub(1).map(|p| article_routes[p].clone());
+        site.documents[index].next = article_routes.get(pos + 1).cloned();
     }
     for (pos, index) in site.projects.clone().into_iter().enumerate() {
-        site.documents[index].previous = pos.checked_sub(1).map(|p| routes[p].clone());
-        site.documents[index].next = routes.get(pos + 1).cloned();
+        site.documents[index].previous = pos.checked_sub(1).map(|p| project_routes[p].clone());
+        site.documents[index].next = project_routes.get(pos + 1).cloned();
     }
 
     for index in 0..site.documents.len() {
