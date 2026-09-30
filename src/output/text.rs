@@ -40,11 +40,11 @@ impl OutputFormatter for TextOutputFormatter {
                 write_block(block, &mut text);
             }
 
-            if let Some(route) = &document.previous {
-                text.push_str(&format!("Previous: {}", route));
-            }
             if let Some(route) = &document.next {
-                text.push_str(&format!("Next: {}", route));
+                text.push_str(&format!("Next: {}\n", route));
+            }
+            if let Some(route) = &document.previous {
+                text.push_str(&format!("Previous: {}\n", route));
             }
 
             fs::write(dir.join("index.txt"), text)

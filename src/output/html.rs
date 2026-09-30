@@ -68,15 +68,15 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
 
     if document.previous.is_some() || document.next.is_some() {
         body.push_str("<nav aria-label=\"navigation\">\n");
-        if let Some(route) = &document.previous {
-            body.push_str(&format!(
-                "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
-                html_escape_attribute(route)
-            ));
-        }
         if let Some(route) = &document.next {
             body.push_str(&format!(
                 "<a rel=\"next\" href=\"{}\">Next</a>\n",
+                html_escape_attribute(route)
+            ));
+        }
+        if let Some(route) = &document.previous {
+            body.push_str(&format!(
+                "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
                 html_escape_attribute(route)
             ));
         }
@@ -123,11 +123,11 @@ fn write_head(document: &Document, config: &Config, output: &mut String) {
         ));
     }
     output.push_str("<link rel=\"alternate\" type=\"text/plain\" href=\"index.txt\">\n");
-    if let Some(path) = &document.previous {
-        output.push_str(&format!("<link rel=\"prev\" href=\"{}\">", path));
-    }
     if let Some(path) = &document.next {
         output.push_str(&format!("<link rel=\"next\" href=\"{}\">", path));
+    }
+    if let Some(path) = &document.previous {
+        output.push_str(&format!("<link rel=\"prev\" href=\"{}\">", path));
     }
     output.push_str("</head>\n");
 }
