@@ -10,6 +10,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
     let mut date: Option<String> = None;
     let mut author: Option<String> = None;
     let mut starred: bool = false;
+    let mut is_index: bool = false;
     let mut index: usize = 0;
 
     while index < lines.len() {
@@ -63,6 +64,18 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
                     }
                 }
             }
+            "index" => {
+                is_index = match value.trim() {
+                    "true" => true,
+                    "false" => false,
+                    unknown => {
+                        return Err(format!(
+                            "Unknown index type {unknown} in {}",
+                            path.display()
+                        ));
+                    }
+                }
+            }
             unknown => {
                 return Err(format!(
                     "Unknown metadata property {unknown} in {}",
@@ -92,6 +105,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
             date,
             author,
             starred,
+            is_index,
         },
         index,
     ))
