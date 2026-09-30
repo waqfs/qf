@@ -3,7 +3,10 @@ use std::{fs, path::Path};
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Block, ImageAlt, Inline},
+        site::{
+            Block::{self},
+            ImageAlt, Inline,
+        },
     },
     config::Config,
     output::OutputFormatter,
@@ -37,11 +40,14 @@ impl OutputFormatter for TextOutputFormatter {
                 write_block(block, &mut text);
             }
 
-            if let Some(route) = &document.previous {
-                text.push_str(&format!("Previous: {}", route));
-            }
             if let Some(route) = &document.next {
-                text.push_str(&format!("Next: {}", route));
+                text.push_str(&format!("Next: {}\n", route));
+            }
+            if let Some(route) = &document.all {
+                text.push_str(&format!("All: {}\n", route));
+            }
+            if let Some(route) = &document.previous {
+                text.push_str(&format!("Previous: {}\n", route));
             }
 
             fs::write(dir.join("index.txt"), text)
@@ -69,7 +75,8 @@ fn write_block(block: &Block, output: &mut String) {
             }
             output.push('\n');
         }
-        Block::OrderedList(items) => {
+        Block::LinkedIndex(crate::compiler::model::site::LinkedIndex { items, .. })
+        | Block::OrderedList(items) => {
             for (index, item) in items.iter().enumerate() {
                 output.push_str(&format!("{}. ", index + 1));
                 write_inlines(item, output);
@@ -120,7 +127,7 @@ fn write_block(block: &Block, output: &mut String) {
 fn write_inlines(inlines: &[Inline], output: &mut String) {
     for inline in inlines {
         match inline {
-            Inline::Text(text) | Inline::Code(text) => output.push_str(text),
+            Inline::Text(text) | Inline::Span(text) | Inline::Code(text) => output.push_str(text),
             Inline::Emphasis(text) | Inline::Strong(text) => write_inlines(text, output),
             Inline::Link { label, href } => {
                 write_inlines(label, output);

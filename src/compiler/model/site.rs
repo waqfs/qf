@@ -14,6 +14,15 @@ pub struct Metadata {
     pub summary: Option<String>,
     pub date: Option<String>,
     pub author: Option<String>,
+    pub starred: bool,
+    pub is_index: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MetadataFields {
+    Title,
+    Summary,
+    Date,
 }
 
 #[derive(Debug, Clone)]
@@ -22,8 +31,9 @@ pub struct Document {
     pub metadata: Metadata,
     pub route: String,
     pub blocks: Vec<Block>,
-    pub previous: Option<String>,
     pub next: Option<String>,
+    pub all: Option<String>,
+    pub previous: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -41,6 +51,7 @@ pub enum Block {
         code: String,
     },
     Image(Image),
+    LinkedIndex(LinkedIndex),
 }
 
 #[derive(Debug, Clone)]
@@ -59,8 +70,34 @@ pub enum ImageAlt {
 #[derive(Debug, Clone)]
 pub enum Inline {
     Text(String),
+    Span(String),
     Emphasis(Vec<Inline>),
     Strong(Vec<Inline>),
     Code(String),
     Link { label: Vec<Inline>, href: String },
+}
+
+#[derive(Debug, Clone)]
+pub struct LinkedIndex {
+    pub doc_type: DocumentType,
+    pub limit: Option<usize>,
+    pub starred: Option<bool>,
+    pub fields: Vec<MetadataFields>,
+    pub items: Vec<Vec<Inline>>,
+}
+
+impl LinkedIndex {
+    pub fn new(doc_type: DocumentType) -> Self {
+        Self {
+            doc_type,
+            limit: None,
+            starred: None,
+            fields: vec![
+                MetadataFields::Title,
+                MetadataFields::Summary,
+                MetadataFields::Date,
+            ],
+            items: Vec::new(),
+        }
+    }
 }

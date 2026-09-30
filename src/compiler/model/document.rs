@@ -9,4 +9,6 @@ pub struct Site {
     pub routes: BTreeMap<String, usize>,
     pub articles: Vec<usize>,
     pub projects: Vec<usize>,
+    pub article_index: Option<usize>,
+    pub project_index: Option<usize>,
 }

@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Block, Document, ImageAlt, Inline},
+        site::{Block, Document, DocumentType, ImageAlt, Inline, LinkedIndex},
     },
     config::Config,
     output::OutputFormatter,
@@ -68,15 +68,21 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
 
     if document.previous.is_some() || document.next.is_some() {
         body.push_str("<nav aria-label=\"navigation\">\n");
-        if let Some(route) = &document.previous {
-            body.push_str(&format!(
-                "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
-                html_escape_attribute(route)
-            ));
-        }
         if let Some(route) = &document.next {
             body.push_str(&format!(
                 "<a rel=\"next\" href=\"{}\">Next</a>\n",
+                html_escape_attribute(route)
+            ));
+        }
+        if let Some(route) = &document.all {
+            body.push_str(&format!(
+                "<a href=\"{}\">All</a>\n",
+                html_escape_attribute(route)
+            ));
+        }
+        if let Some(route) = &document.previous {
+            body.push_str(&format!(
+                "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
                 html_escape_attribute(route)
             ));
         }
@@ -123,11 +129,11 @@ fn write_head(document: &Document, config: &Config, output: &mut String) {
         ));
     }
     output.push_str("<link rel=\"alternate\" type=\"text/plain\" href=\"index.txt\">\n");
-    if let Some(path) = &document.previous {
-        output.push_str(&format!("<link rel=\"prev\" href=\"{}\">", path));
-    }
     if let Some(path) = &document.next {
         output.push_str(&format!("<link rel=\"next\" href=\"{}\">", path));
+    }
+    if let Some(path) = &document.previous {
+        output.push_str(&format!("<link rel=\"prev\" href=\"{}\">", path));
     }
     output.push_str("</head>\n");
 }
@@ -183,6 +189,7 @@ fn write_block(block: &Block, output: &mut String) {
             write_inline(inlines, output);
             output.push_str("</p>\n");
         }
+        Block::LinkedIndex(index) => write_index(index, output),
     }
 }
 
@@ -190,6 +197,7 @@ fn write_inline(inlines: &[Inline], output: &mut String) {
     for inline in inlines {
         match inline {
             Inline::Text(text) => output.push_str(&html_escape(text)),
+            Inline::Span(text) => output.push_str(&format!("<span>{}</span>", html_escape(text))),
             Inline::Emphasis(text) => {
                 output.push_str("<em>");
                 write_inline(text, output);
@@ -218,6 +226,21 @@ fn write_list(tag: &str, items: &[Vec<Inline>], output: &mut String) {
         output.push_str("</li>\n");
     }
     output.push_str(&format!("</{tag}>\n"));
+}
+
+fn write_index(index: &LinkedIndex, output: &mut String) {
+    let class = match index.doc_type {
+        DocumentType::Project => " project",
+        DocumentType::Article => " article",
+        _ => "",
+    };
+    output.push_str(&format!("<ol class=\"index{class}\">"));
+    for item in &index.items {
+        output.push_str("<li>");
+        write_inline(item, output);
+        output.push_str("</li>\n");
+    }
+    output.push_str("</ol>\n");
 }
 
 fn html_escape(value: &str) -> String {
