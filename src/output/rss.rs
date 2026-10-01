@@ -1,7 +1,10 @@
-use std::{fs, path::Path};
+use std::{fs, ops::Add, path::Path};
 
 use crate::{
-    compiler::model::{document::Site, site::Document},
+    compiler::model::{
+        document::Site,
+        site::{Document, DocumentType},
+    },
     config::Config,
     output::OutputFormatter,
 };
@@ -37,8 +40,60 @@ impl OutputFormatter for RSSOutputFormatter {
 
 fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     let mut body = String::new();
-    body.push_str("rss");
+    body.push_str("<rss version=\"2.0\">\n");
+    body.push_str("<channel>\n");
+    body.push_str(&format!("<title>{}</title>\n", xml_escape(&config.title)));
+    body.push_str(&format!("<link>{}</link>\n", xml_escape(&config.base_url)));
+    body.push_str(&format!(
+        "<description>{}</description>\n",
+        match &document.metadata.summary {
+            Some(summary) => xml_escape(summary),
+            None => "No description provided".to_string(),
+        }
+    ));
+    // body.push_str(&format!("<pubDate></pubDate>"));
+    // body.push_str(&format!("<lastBuildDate></lastBuildDate>"));
+    body.push_str(&format!(
+        "<category>{}</category>\n",
+        match &document.metadata.doc_type {
+            DocumentType::Article => "Articles",
+            DocumentType::Project => "Projects",
+            DocumentType::Page => "Miscellaneous",
+        }
+    ));
+    body.push_str("<generator>qf (https://github.com/waqfs/qf)</generator>\n");
+    body.push_str("<docs>https://www.rssboard.org/rss-specification</docs>\n");
+    write_items(site, &document.metadata.doc_type, config, &mut body);
+    body.push_str("</channel>\n");
+    body.push_str("</rss>");
     body
+}
+
+fn write_items(site: &Site, doc_type: &DocumentType, config: &Config, output: &mut String) {
+    let documents = match doc_type {
+        DocumentType::Article => &site.articles,
+        DocumentType::Project => &site.projects,
+        DocumentType::Page => return,
+    };
+    for index in documents {
+        let document = &site.documents[*index];
+        output.push_str("<item>");
+        output.push_str(&format!("<title>{}</title>", document.metadata.title));
+        output.push_str(&format!(
+            "<link>{}</link>",
+            config.base_url.clone().add(&document.route)
+        ));
+        if let Some(summary) = &document.metadata.summary {
+            output.push_str(&format!("<description>{}</description>", summary));
+        }
+        if let Some(author) = &document.metadata.author {
+            output.push_str(&format!("<author>{}</author>", author));
+        }
+        if let Some(date) = &document.metadata.date {
+            output.push_str(&format!("<pubDate>{}</pubDate>", date));
+        }
+        output.push_str("</item>\n");
+    }
 }
 
 fn xml_escape(value: &str) -> String {
