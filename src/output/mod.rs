@@ -4,6 +4,7 @@ use crate::{compiler::model::document::Site, config::Config};
 
 pub mod html;
 pub mod text;
+pub mod rss;
 
 pub trait OutputFormatter {
     fn name(&self) -> &'static str;
@@ -14,5 +15,6 @@ pub fn outputs() -> Vec<Box<dyn OutputFormatter>> {
     return vec![
         Box::new(html::HTMLOutputFormatter),
         Box::new(text::TextOutputFormatter),
+        Box::new(rss::RSSOutputFormatter),
     ];
 }
