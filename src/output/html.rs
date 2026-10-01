@@ -54,8 +54,8 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     if let Some(date) = &document.metadata.date {
         body.push_str(&format!(
             "<time datetime=\"{}\">{}</time>\n",
-            html_escape_attribute(date),
-            html_escape(date)
+            html_escape_attribute(date.to_rfc3339().as_str()),
+            html_escape(&date.format("%m/%d/%Y").to_string())
         ));
     }
     if let Some(author) = &document.metadata.author {

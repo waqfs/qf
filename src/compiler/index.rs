@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, path::Path, process::exit, usize};
+use std::{cmp::Ordering, collections::BTreeMap, path::Path, process::exit, usize};
 
 use crate::{
     compiler::model::{
@@ -6,6 +6,7 @@ use crate::{
         site::{Block, Document, DocumentType, Inline, LinkedIndex, MetadataFields},
     },
     config::Config,
+    parser,
 };
 
 pub fn build_index(
@@ -56,14 +57,16 @@ pub fn build_index(
 
 pub fn process_index(site: &mut Site) {
     site.articles.sort_by(|a, b| {
-        let first_date = site.documents[*a].metadata.date.as_deref().unwrap_or("");
-        let second_date = site.documents[*b].metadata.date.as_deref().unwrap_or("");
-        first_date.cmp(second_date)
+        parser::date::sort(
+            site.documents[*a].metadata.date,
+            site.documents[*b].metadata.date,
+        )
     });
     site.projects.sort_by(|a, b| {
-        let first_date = site.documents[*a].metadata.date.as_deref().unwrap_or("");
-        let second_date = site.documents[*b].metadata.date.as_deref().unwrap_or("");
-        first_date.cmp(second_date)
+        parser::date::sort(
+            site.documents[*a].metadata.date,
+            site.documents[*b].metadata.date,
+        )
     });
 
     let article_routes: Vec<String> = site
@@ -131,12 +134,7 @@ fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
         .collect();
 
     documents.sort_by(|a, b| {
-        b.metadata
-            .date
-            .as_deref()
-            .unwrap_or("")
-            .cmp(a.metadata.date.as_deref().unwrap_or(""))
-            .then_with(|| a.route.cmp(&b.route))
+        parser::date::sort(b.metadata.date, a.metadata.date).then_with(|| a.route.cmp(&b.route))
     });
 
     documents
@@ -159,7 +157,7 @@ fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
                         .metadata
                         .date
                         .as_ref()
-                        .map(|v| Inline::Span(v.clone())),
+                        .map(|v| Inline::Span(v.to_rfc2822())),
                 };
                 if let Some(value) = value {
                     if !item.is_empty() {
