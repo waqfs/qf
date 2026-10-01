@@ -11,4 +11,5 @@ pub struct Site {
     pub projects: Vec<usize>,
     pub article_index: Option<usize>,
     pub project_index: Option<usize>,
+    pub handles: BTreeMap<String, usize>,
 }

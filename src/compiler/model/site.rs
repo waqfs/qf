@@ -16,6 +16,7 @@ pub struct Metadata {
     pub summary: Option<String>,
     pub date: Option<DateTime<Utc>>,
     pub author: Option<String>,
+    pub handle: Option<String>,
     pub starred: bool,
     pub is_index: bool,
 }
@@ -36,6 +37,13 @@ pub struct Document {
     pub next: Option<String>,
     pub all: Option<String>,
     pub previous: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct DocumentHandle {
+    pub title: String,
+    pub route: String,
+    pub handle: String,
 }
 
 #[derive(Debug, Clone)]
@@ -102,4 +110,9 @@ impl LinkedIndex {
             items: Vec::new(),
         }
     }
+}
+#[derive(Debug, Clone)]
+pub struct Handle {
+    pub name: String,
+    pub suffix: String,
 }
