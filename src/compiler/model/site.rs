@@ -40,6 +40,13 @@ pub struct Document {
 }
 
 #[derive(Debug, Clone)]
+pub struct DocumentHandle {
+    pub title: String,
+    pub route: String,
+    pub handle: String,
+}
+
+#[derive(Debug, Clone)]
 pub enum Block {
     Paragraph(Vec<Inline>),
     Heading {
@@ -103,4 +110,9 @@ impl LinkedIndex {
             items: Vec::new(),
         }
     }
+}
+#[derive(Debug, Clone)]
+pub struct Handle {
+    pub name: String,
+    pub suffix: String,
 }

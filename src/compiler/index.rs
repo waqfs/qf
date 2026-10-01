@@ -1,9 +1,12 @@
-use std::{cmp::Ordering, collections::BTreeMap, path::Path, process::exit, usize};
+use std::{collections::BTreeMap, ops::Add, path::Path, usize};
 
 use crate::{
     compiler::model::{
         document::Site,
-        site::{Block, Document, DocumentType, Inline, LinkedIndex, MetadataFields},
+        site::{
+            Block, Document, DocumentHandle, DocumentType, Handle, Inline, LinkedIndex,
+            MetadataFields,
+        },
     },
     config::Config,
     parser,
@@ -28,6 +31,10 @@ pub fn build_index(
                 "Error indexing routes, duplicates not allowed: {}",
                 document.route
             ));
+        }
+
+        if let Some(handle) = &document.metadata.handle {
+            handles.insert(handle.clone(), index);
         }
 
         if document.metadata.is_index {
@@ -57,7 +64,7 @@ pub fn build_index(
     })
 }
 
-pub fn process_index(site: &mut Site) {
+pub fn process_index(site: &mut Site) -> Result<(), String> {
     site.articles.sort_by(|a, b| {
         parser::date::sort(
             site.documents[*a].metadata.date,
@@ -115,6 +122,82 @@ pub fn process_index(site: &mut Site) {
                 linked_index.items = items;
             }
         }
+    }
+    patch_handles(site)?;
+    Ok(())
+}
+
+fn patch_handles(site: &mut Site) -> Result<(), String> {
+    let mut resolved_handles: BTreeMap<String, DocumentHandle> = BTreeMap::new();
+    for (handle, index) in &mut site.handles {
+        resolved_handles.insert(
+            handle.clone(),
+            DocumentHandle {
+                title: site.documents[*index].metadata.title.clone(),
+                route: site.documents[*index].route.clone(),
+                handle: handle.clone(),
+            },
+        );
+    }
+
+    for document in &mut site.documents {
+        for block in &mut document.blocks {
+            match block {
+                Block::BlockQuote(inlines) | Block::Paragraph(inlines) => {
+                    patch_links(&resolved_handles, inlines)?
+                }
+                Block::Heading { level, content } => patch_links(&resolved_handles, content)?,
+                Block::OrderedList(items) | Block::UnorderedList(items) => {
+                    for item in items {
+                        patch_links(&resolved_handles, item)?;
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(())
+}
+
+fn patch_links(
+    handles: &BTreeMap<String, DocumentHandle>,
+    inline: &mut Vec<Inline>,
+) -> Result<(), String> {
+    for item in inline {
+        match item {
+            Inline::Link { label, href } => {
+                if href.starts_with("::") {
+                    let handle = parse_handle(&href);
+                    let resolved_handle = handles
+                        .iter()
+                        .find(|(_, document)| document.handle == handle.name);
+
+                    match resolved_handle {
+                        Some((_, document)) => {
+                            *href = document.route.clone().add(&handle.suffix);
+                            if label.is_empty() {
+                                label.push(Inline::Text(document.title.clone()));
+                            }
+                        }
+                        None => {
+                            return Err(format!("Error resolving handle: {}", href));
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn parse_handle(handle: &str) -> Handle {
+    let (name, suffix) = handle[2..]
+        .split_once('#')
+        .unwrap_or((handle[2..].as_ref(), ""));
+    Handle {
+        name: name.to_string(),
+        suffix: suffix.to_string(),
     }
 }
 
