@@ -1,5 +1,5 @@
 ### qf
-`qf` is an opinionated portfolio static stie generator that compiles custom markdown-like syntax into different document types. Export options currently include HTML, TXT, and RSS.
+`qf` is an opinionated portfolio static site generator that compiles custom markdown-like syntax into different document types. Export options currently include HTML, TXT, and RSS.
 
 #### Motivation
 A portfolio is meant to be a demonstration of your skills and capabilities. In my opinion, this means that you either use a portfolio to list out and showcase projects that you have worked on, experience you have gained, awards you have obtained, and so on; or you build the portfolio to itself showcase your skills. I am not a graphic designer nor better than anyone else at making websites - so I fall into the former category.
