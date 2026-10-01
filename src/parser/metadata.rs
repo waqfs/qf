@@ -1,13 +1,18 @@
 use std::{collections::BTreeSet, path::Path};
 
-use crate::compiler::model::site::{DocumentType, Metadata};
+use chrono::{DateTime, Utc};
+
+use crate::{
+    compiler::model::site::{DocumentType, Metadata},
+    parser::date::parse_date,
+};
 
 pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
     let mut seen: BTreeSet<String> = BTreeSet::new();
     let mut doc_type: Option<DocumentType> = None;
     let mut title: Option<String> = None;
     let mut summary: Option<String> = None;
-    let mut date: Option<String> = None;
+    let mut date: Option<DateTime<Utc>> = None;
     let mut author: Option<String> = None;
     let mut starred: bool = false;
     let mut is_index: bool = false;
@@ -50,7 +55,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
             }
             "title" => title = Some(value.trim().to_string()),
             "summary" => summary = Some(value.trim().to_string()),
-            "date" => date = Some(value.trim().to_string()),
+            "date" => date = Some(parse_date(value, &"".to_string())?),
             "author" => author = Some(value.trim().to_string()),
             "starred" => {
                 starred = match value.trim() {

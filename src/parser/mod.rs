@@ -1,7 +1,7 @@
 mod block;
 mod inline;
 mod metadata;
-mod date;
+pub mod date;
 
 use crate::compiler::{model::site::Document, source::PortfolioFile};
 

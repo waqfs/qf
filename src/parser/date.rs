@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Utc, offset::LocalResult};
 use chrono_tz::Tz;
 
@@ -28,6 +30,15 @@ pub fn parse_date(input: &str, default_tz: &str) -> Result<DateTime<Utc>, String
     }
 
     Err("Invalid date format.".to_string())
+}
+
+pub fn sort(a: Option<DateTime<Utc>>, b: Option<DateTime<Utc>>) -> Ordering {
+    match (a, b) {
+        (Some(a), Some(b)) => a.cmp(&b),
+        (Some(_), None) => Ordering::Greater,
+        (None, Some(_)) => Ordering::Less,
+        (None, None) => Ordering::Equal,
+    }
 }
 
 fn tz_to_utc(local: NaiveDateTime, timezone: Tz) -> Result<DateTime<Utc>, String> {
