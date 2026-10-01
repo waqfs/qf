@@ -42,6 +42,7 @@ impl OutputFormatter for RSSOutputFormatter {
 
 fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     let mut body = String::new();
+    body.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     body.push_str("<rss version=\"2.0\">\n");
     body.push_str("<channel>\n");
     body.push_str(&format!("<title>{}</title>\n", xml_escape(&config.title)));
@@ -55,7 +56,7 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     ));
     // body.push_str(&format!("<pubDate></pubDate>"));
     body.push_str(&format!(
-        "<lastBuildDate>{}</lastBuildDate>",
+        "<lastBuildDate>{}</lastBuildDate>\n",
         Local::now().to_rfc2822()
     ));
     body.push_str(&format!(
