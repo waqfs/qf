@@ -41,6 +41,6 @@ fn compile(root: &Path) -> Result<(Config, Site), String> {
     }
 
     let mut site: Site = build_index(root, config.clone(), documents)?;
-    process_index(&mut site);
+    process_index(&mut site)?;
     Ok((config, site))
 }
