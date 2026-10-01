@@ -1,5 +1,5 @@
 ### qf
-`qf` is an opinionated portfolio static stie generator that compiles custom markdown-like syntax into different document types. Export options currently include HTML and TXT, with more to come.
+`qf` is an opinionated portfolio static stie generator that compiles custom markdown-like syntax into different document types. Export options currently include HTML, TXT, and RSS.
 
 #### Motivation
 A portfolio is meant to be a demonstration of your skills and capabilities. In my opinion, this means that you either use a portfolio to list out and showcase projects that you have worked on, experience you have gained, awards you have obtained, and so on; or you build the portfolio to itself showcase your skills. I am not a graphic designer nor better than anyone else at making websites - so I fall into the former category.
@@ -14,7 +14,7 @@ The goals are quite simple: digest a markdown-like language, transform into HTML
 #### Non-Goals
 A portfolio is not a place to self-proclaim that you know 100% of JavaScript (high chance you don't) or Vite (what does this even mean?). There will be no custom components to create any of the following:
 - Skill lists, trees, or whatever
-- Quotes
+- Random Quotes
 - Interactive contact forms
 - Advanced HTML layering or complex layouts
 - Animations
@@ -24,22 +24,29 @@ If this tool doesn't have what you want, then use something else, it is not my p
 ### Features
 `qf` supports exporting to accessible `.html` and plain text `.txt` files. It currently does both simultaneously and without configuration. Pages that are tagged with the same type are indexed together, allowing for pages to link to the previous and/or next entry - great for blog posts and other articles - and this happens automatically, updating all relevant pages when you create a new page.
 
+Index pages with the `@index true` property will also generate RSS feed `.xml` files. The content of these feeds is determined based on the type of the document labeled `@index true`. For example, creating an index page with `@type article` and `@index true` will generate an `rss.xml` with links to all `@type article` pages.
+
 Static files are copied from a configurable directory, default `static`, merged directly into the output `dist` directory. This is where you will include your custom `style.css` for styling HTML output, `favicon`, images, and more.
 
-#### Planned Features
-- Index Pages: dedicated pages that list out all pages available of a specific type. This way people can search all of your articles at once.
-- Linked Page Content: copy content from specific pages, such as project pages, to reference in other pages. Simply create unique pages for each project you've worked on, and link content such as the name, description, image, and more, through an index or list on your root page.
-- RSS XML Output: specifically for indexes, so people can subscribe through an RSS application to your articles, projects, and more.
-
 ### Language
-The language is intentionally similar to markdown, however it _does not implement markdown_, and implements custom blocks to handle custom components and enforced accessibility.
+The language is intentionally similar to markdown, implementing custom blocks to handle custom components and enforced accessibility, but it _does not implement markdown_.
 
+All pages require header metadata like the following:
+~~~less
+@type article
+@title Building a Static Portfolio Generator
+@summary My viewpoints on portfolios and how I built a custom static site generator to make mine.
+@date 10/01/2026
+@author waqfs
+@handle building-portfolio-generator
+@index false
 ~~~
-@type page
-@title Some Page Title
-@summary This is an example page.
-@date Sunday, September 20th
 
+These properties help build accessible pages, link content between pages such as title and summary, and sort pages by publish date.
+
+The rest of the remaining syntax is deliberately similar to markdown:
+
+~~~md
 # This is a header
 
 ## This is a smaller header
@@ -53,13 +60,6 @@ The language is intentionally similar to markdown, however it _does not implemen
 - unordered list
 - that contains *emphasis*
 
-@image example.png
-alt="An image that reads 'example'."
-caption="An optional caption that described the image."
-
-@image arrow_down.png
-decorative
-
 Built with [qf](https://github.com/waqfs/qf).
 
 > A quote I definitely live by
@@ -67,6 +67,19 @@ Built with [qf](https://github.com/waqfs/qf).
 ```js
 console.log("Hello, code block!");
 ```
+~~~
+
+There are custom blocks and custom parsing rules to handle special cases, such as imagery and linking by handles:
+
+~~~less
+@image example.png
+alt="An image that reads 'example'."
+caption="An optional caption that described the image."
+
+@image arrow_down.png
+decorative
+
+Check out my article on [](::building-portfolio-generator)
 ~~~
 
 This language format is used for all types of pages, regardless of export format. Accessibility properties are required, even if certain output formats never use them.
