@@ -26,11 +26,6 @@ If this tool doesn't have what you want, then use something else, it is not my p
 
 Static files are copied from a configurable directory, default `static`, merged directly into the output `dist` directory. This is where you will include your custom `style.css` for styling HTML output, `favicon`, images, and more.
 
-#### Planned Features
-- Index Pages: dedicated pages that list out all pages available of a specific type. This way people can search all of your articles at once.
-- Linked Page Content: copy content from specific pages, such as project pages, to reference in other pages. Simply create unique pages for each project you've worked on, and link content such as the name, description, image, and more, through an index or list on your root page.
-- RSS XML Output: specifically for indexes, so people can subscribe through an RSS application to your articles, projects, and more.
-
 ### Language
 The language is intentionally similar to markdown, however it _does not implement markdown_, and implements custom blocks to handle custom components and enforced accessibility.
 
