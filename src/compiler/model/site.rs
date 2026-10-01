@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use chrono::{DateTime, Utc};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DocumentType {
     Page,
@@ -12,7 +14,7 @@ pub struct Metadata {
     pub doc_type: DocumentType,
     pub title: String,
     pub summary: Option<String>,
-    pub date: Option<String>,
+    pub date: Option<DateTime<Utc>>,
     pub author: Option<String>,
     pub starred: bool,
     pub is_index: bool,
