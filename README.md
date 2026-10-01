@@ -24,6 +24,8 @@ If this tool doesn't have what you want, then use something else, it is not my p
 ### Features
 `qf` supports exporting to accessible `.html` and plain text `.txt` files. It currently does both simultaneously and without configuration. Pages that are tagged with the same type are indexed together, allowing for pages to link to the previous and/or next entry - great for blog posts and other articles - and this happens automatically, updating all relevant pages when you create a new page.
 
+Index pages with the `@index true` property will also generate RSS feed `.xml` files. The content of these feeds is determines based on the type of the document labelled `@index true`. For example, creating an index page with `@type article` and `@index true` will generate an `rss.xml` with links to all `@type article` pages.
+
 Static files are copied from a configurable directory, default `static`, merged directly into the output `dist` directory. This is where you will include your custom `style.css` for styling HTML output, `favicon`, images, and more.
 
 ### Language
