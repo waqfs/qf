@@ -174,7 +174,7 @@ fn patch_links(
 
                     match resolved_handle {
                         Some((_, document)) => {
-                            *href = document.route.clone().add(&handle.suffix);
+                            *href = format!("{}#{}", document.route, handle.suffix);
                             if label.is_empty() {
                                 label.push(Inline::Text(document.title.clone()));
                             }
