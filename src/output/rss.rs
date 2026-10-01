@@ -81,6 +81,11 @@ fn write_items(site: &Site, doc_type: &DocumentType, config: &Config, output: &m
         DocumentType::Project => &site.projects,
         DocumentType::Page => return,
     };
+    let doc_type_str = match doc_type {
+        DocumentType::Article => "article",
+        DocumentType::Project => "project",
+        DocumentType::Page => "page",
+    };
     for index in documents {
         let document = &site.documents[*index];
         output.push_str("<item>");
@@ -97,6 +102,12 @@ fn write_items(site: &Site, doc_type: &DocumentType, config: &Config, output: &m
         }
         if let Some(date) = &document.metadata.date {
             output.push_str(&format!("<pubDate>{}</pubDate>", date.to_rfc2822()));
+        }
+        if let Some(handle) = &document.metadata.handle {
+            output.push_str(&format!(
+                "<guid isPermaLink=\"false\">qf:{}:{}</guid>",
+                doc_type_str, handle
+            ));
         }
         output.push_str("</item>\n");
     }
