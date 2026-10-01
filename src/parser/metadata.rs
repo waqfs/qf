@@ -15,6 +15,7 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
     let mut summary: Option<String> = None;
     let mut date: Option<DateTime<Utc>> = None;
     let mut author: Option<String> = None;
+    let mut handle: Option<String> = None;
     let mut starred: bool = false;
     let mut is_index: bool = false;
     let mut index: usize = 0;
@@ -58,6 +59,7 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
             "summary" => summary = Some(value.trim().to_string()),
             "date" => date = Some(parse_date(value, &config.timezone)?),
             "author" => author = Some(value.trim().to_string()),
+            "handle" => handle = Some(value.trim().to_string()),
             "starred" => {
                 starred = match value.trim() {
                     "true" => true,
@@ -110,6 +112,7 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
             summary,
             date,
             author,
+            handle,
             starred,
             is_index,
         },

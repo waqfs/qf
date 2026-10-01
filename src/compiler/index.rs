@@ -19,6 +19,7 @@ pub fn build_index(
     let mut projects = Vec::new();
     let mut article_index: Option<usize> = None;
     let mut project_index: Option<usize> = None;
+    let mut handles = BTreeMap::new();
 
     for (index, document) in documents.iter_mut().enumerate() {
         document.route = route(document, root, &config);
@@ -52,6 +53,7 @@ pub fn build_index(
         projects,
         article_index,
         project_index,
+        handles,
     })
 }
 

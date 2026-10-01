@@ -16,6 +16,7 @@ pub struct Metadata {
     pub summary: Option<String>,
     pub date: Option<DateTime<Utc>>,
     pub author: Option<String>,
+    pub handle: Option<String>,
     pub starred: bool,
     pub is_index: bool,
 }
