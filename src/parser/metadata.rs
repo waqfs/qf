@@ -4,10 +4,11 @@ use chrono::{DateTime, Utc};
 
 use crate::{
     compiler::model::site::{DocumentType, Metadata},
+    config::Config,
     parser::date::parse_date,
 };
 
-pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
+pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, usize), String> {
     let mut seen: BTreeSet<String> = BTreeSet::new();
     let mut doc_type: Option<DocumentType> = None;
     let mut title: Option<String> = None;
@@ -55,7 +56,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<(Metadata, usize), String> {
             }
             "title" => title = Some(value.trim().to_string()),
             "summary" => summary = Some(value.trim().to_string()),
-            "date" => date = Some(parse_date(value, &"".to_string())?),
+            "date" => date = Some(parse_date(value, &config.timezone)?),
             "author" => author = Some(value.trim().to_string()),
             "starred" => {
                 starred = match value.trim() {

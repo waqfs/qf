@@ -32,7 +32,7 @@ fn compile(root: &Path) -> Result<(Config, Site), String> {
     let mut documents = Vec::new();
 
     for file in files {
-        match source::get_raw(&file).and_then(|file| parser::parse_document(&file)) {
+        match source::get_raw(&file).and_then(|file| parser::parse_document(&file, &config)) {
             Ok(document) => {
                 documents.push(document);
             }

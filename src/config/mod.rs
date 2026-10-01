@@ -9,6 +9,7 @@ pub struct Config {
     pub title: String,
     pub base_url: String,
     pub stylesheet: Option<String>,
+    pub timezone: String,
 
     #[serde(default = "default_language")]
     pub language: String,
