@@ -29,7 +29,7 @@ Index pages with the `@index true` property will also generate RSS feed `.xml` f
 Static files are copied from a configurable directory, default `static`, merged directly into the output `dist` directory. This is where you will include your custom `style.css` for styling HTML output, `favicon`, images, and more.
 
 ### Language
-The language is intentionally similar to markdown, however it _does not implement markdown_, and implements custom blocks to handle custom components and enforced accessibility.
+The language is intentionally similar to markdown, implementing custom blocks to handle custom components and enforced accessibility, but it _does not implement markdown_.
 
 ~~~
 @type page
