@@ -1,5 +1,7 @@
 use std::{fs, ops::Add, path::Path};
 
+use chrono::Local;
+
 use crate::{
     compiler::model::{
         document::Site,
@@ -52,7 +54,10 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
         }
     ));
     // body.push_str(&format!("<pubDate></pubDate>"));
-    // body.push_str(&format!("<lastBuildDate></lastBuildDate>"));
+    body.push_str(&format!(
+        "<lastBuildDate>{}</lastBuildDate>",
+        Local::now().to_rfc2822()
+    ));
     body.push_str(&format!(
         "<category>{}</category>\n",
         match &document.metadata.doc_type {
@@ -90,7 +95,7 @@ fn write_items(site: &Site, doc_type: &DocumentType, config: &Config, output: &m
             output.push_str(&format!("<author>{}</author>", author));
         }
         if let Some(date) = &document.metadata.date {
-            output.push_str(&format!("<pubDate>{}</pubDate>", date));
+            output.push_str(&format!("<pubDate>{}</pubDate>", date.to_rfc2822()));
         }
         output.push_str("</item>\n");
     }
