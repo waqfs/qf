@@ -42,7 +42,7 @@ impl OutputFormatter for RSSOutputFormatter {
 
 fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     let mut body = String::new();
-    body.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    body.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     body.push_str("<rss version=\"2.0\">\n");
     body.push_str("<channel>\n");
     body.push_str(&format!("<title>{}</title>\n", xml_escape(&config.title)));
