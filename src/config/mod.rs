@@ -4,6 +4,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::error::QFError;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     pub title: String,
@@ -41,12 +43,12 @@ fn default_static_dir() -> PathBuf {
 }
 
 impl Config {
-    pub fn load(root: &Path) -> Result<Self, String> {
+    pub fn load(root: &Path) -> Result<Self, QFError> {
         let path = root.join("qf.config.json");
-        let raw =
-            fs::read_to_string(&path).map_err(|e| format!("Failed to read config file: {}", e))?;
+        let raw = fs::read_to_string(&path)
+            .map_err(|e| QFError::Message(format!("Failed to read config file: {}", e)))?;
         let config: Config = serde_json::from_str(&raw)
-            .map_err(|e| format!("Failed to parse config file: {}", e))?;
+            .map_err(|e| QFError::Message(format!("Failed to parse config file: {}", e)))?;
         Ok(config)
     }
 }

@@ -6,6 +6,7 @@ use crate::{
         site::{Block, Document, DocumentType, ImageAlt, Inline, LinkedIndex},
     },
     config::Config,
+    error::QFError,
     output::OutputFormatter,
 };
 
@@ -16,14 +17,14 @@ impl OutputFormatter for HTMLOutputFormatter {
         "html"
     }
 
-    fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), String> {
+    fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError> {
         for document in &site.documents {
             let dir = stage.join(document.route.trim_matches('/'));
             fs::create_dir_all(&dir)
-                .map_err(|e| format!("Failed to create output directory: {e}"))?;
+                .map_err(|e| QFError::Message(format!("Failed to create output directory: {e}")))?;
             let text = write_document(document, site, config);
             fs::write(dir.join("index.html"), text)
-                .map_err(|e| format!("Failed to write file: {e}"))?;
+                .map_err(|e| QFError::Message(format!("Failed to write file: {e}")))?;
         }
         Ok(())
     }

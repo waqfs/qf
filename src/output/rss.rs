@@ -8,6 +8,7 @@ use crate::{
         site::{Document, DocumentType},
     },
     config::Config,
+    error::QFError,
     output::OutputFormatter,
 };
 
@@ -18,7 +19,7 @@ impl OutputFormatter for RSSOutputFormatter {
         "rss"
     }
 
-    fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), String> {
+    fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError> {
         let mut documents: Vec<&Document> = Vec::new();
         if let Some(index) = site.article_index {
             documents.push(&site.documents[index]);
@@ -30,10 +31,10 @@ impl OutputFormatter for RSSOutputFormatter {
         for document in documents {
             let dir = stage.join(document.route.trim_matches('/'));
             fs::create_dir_all(&dir)
-                .map_err(|e| format!("Failed to create output directory: {e}"))?;
+                .map_err(|e| QFError::Message(format!("Failed to create output directory: {e}")))?;
             let text = write_document(document, site, config);
             fs::write(dir.join("rss.xml"), text)
-                .map_err(|e| format!("Failed to write file: {e}"))?;
+                .map_err(|e| QFError::Message(format!("Failed to write file: {e}")))?;
         }
 
         Ok(())

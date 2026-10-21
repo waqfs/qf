@@ -5,10 +5,11 @@ use chrono::{DateTime, Utc};
 use crate::{
     compiler::model::site::{DocumentType, Metadata},
     config::Config,
+    error::QFError,
     parser::date::parse_date,
 };
 
-pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, usize), String> {
+pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, usize), QFError> {
     let mut seen: BTreeSet<String> = BTreeSet::new();
     let mut doc_type: Option<DocumentType> = None;
     let mut title: Option<String> = None;
@@ -32,13 +33,13 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
 
         let (key, value) = line[1..]
             .split_once(' ')
-            .ok_or_else(|| format!("Failed to parse metadata property"))?;
+            .ok_or_else(|| QFError::Message(format!("Failed to parse metadata property")))?;
 
         if !seen.insert(key.to_string()) {
-            return Err(format!(
+            return Err(QFError::Message(format!(
                 "Duplicate metadata property {key} in {}",
                 path.display()
-            ));
+            )));
         }
 
         match key {
@@ -48,10 +49,10 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
                     "project" => DocumentType::Project,
                     "article" => DocumentType::Article,
                     unknown => {
-                        return Err(format!(
+                        return Err(QFError::Message(format!(
                             "Unknown document type {unknown} in {}",
                             path.display()
-                        ));
+                        )));
                     }
                 })
             }
@@ -65,10 +66,10 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
                     "true" => true,
                     "false" => false,
                     unknown => {
-                        return Err(format!(
+                        return Err(QFError::Message(format!(
                             "Unknown starred type {unknown} in {}",
                             path.display()
-                        ));
+                        )));
                     }
                 }
             }
@@ -77,18 +78,18 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
                     "true" => true,
                     "false" => false,
                     unknown => {
-                        return Err(format!(
+                        return Err(QFError::Message(format!(
                             "Unknown index type {unknown} in {}",
                             path.display()
-                        ));
+                        )));
                     }
                 }
             }
             unknown => {
-                return Err(format!(
+                return Err(QFError::Message(format!(
                     "Unknown metadata property {unknown} in {}",
                     path.display()
-                ));
+                )));
             }
         }
 
@@ -98,16 +99,16 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
     Ok((
         Metadata {
             doc_type: doc_type.ok_or_else(|| {
-                format!(
+                QFError::Message(format!(
                     "Missing required 'type' metadata property in {}",
                     path.display()
-                )
+                ))
             })?,
             title: title.ok_or_else(|| {
-                format!(
+                QFError::Message(format!(
                     "Missing required 'title' metadata property in {}",
                     path.display()
-                )
+                ))
             })?,
             summary,
             date,
