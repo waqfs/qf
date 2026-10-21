@@ -20,11 +20,9 @@ impl OutputFormatter for HTMLOutputFormatter {
     fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError> {
         for document in &site.documents {
             let dir = stage.join(document.route.trim_matches('/'));
-            fs::create_dir_all(&dir)
-                .map_err(|e| QFError::Message(format!("Failed to create output directory: {e}")))?;
+            fs::create_dir_all(&dir)?;
             let text = write_document(document, site, config);
-            fs::write(dir.join("index.html"), text)
-                .map_err(|e| QFError::Message(format!("Failed to write file: {e}")))?;
+            fs::write(dir.join("index.html"), text)?;
         }
         Ok(())
     }

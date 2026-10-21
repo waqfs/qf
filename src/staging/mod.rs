@@ -13,28 +13,18 @@ pub fn init_stage(root: &Path, config: &Config) -> Result<PathBuf, QFError> {
         .as_millis();
     let path = root.join(format!(".{}.staging-{uid}", config.output_dir.display()));
     if path.exists() {
-        fs::remove_dir_all(&path).map_err(|e| {
-            QFError::Message(format!(
-                "Staging directory exists and failed to be removed. {e}"
-            ))
-        })?;
+        fs::remove_dir_all(&path)?;
     }
-    fs::create_dir_all(&path)
-        .map_err(|e| QFError::Message(format!("Staging directory failed to be created. {e}")))?;
+    fs::create_dir_all(&path)?;
     Ok(path)
 }
 
 pub fn commit_stage(root: &Path, config: &Config, path: &Path) -> Result<(), QFError> {
     let out_path = root.join(&config.output_dir);
     if out_path.exists() {
-        fs::remove_dir_all(&out_path)
-            .map_err(|e| QFError::Message(format!("Output directory failed to be removed. {e}")))?;
+        fs::remove_dir_all(&out_path)?;
     }
-    fs::rename(path, out_path).map_err(|e| {
-        QFError::Message(format!(
-            "Staging directory failed to be renamed to output directory. {e}"
-        ))
-    })?;
+    fs::rename(path, out_path)?;
     Ok(())
 }
 
@@ -47,31 +37,15 @@ pub fn insert_static(root: &Path, config: &Config, stage: &Path) -> Result<(), Q
 }
 
 fn copy_dir(src: &Path, dest: &Path) -> Result<(), QFError> {
-    fs::create_dir_all(dest).map_err(|e| {
-        QFError::Message(format!(
-            "Copy destination directory could not be created. {e}"
-        ))
-    })?;
-    for file in fs::read_dir(src).map_err(|e| {
-        QFError::Message(format!(
-            "Could not read file in directory {}: {e}",
-            src.display()
-        ))
-    })? {
-        let file = file.map_err(|e| {
-            QFError::Message(format!(
-                "An error occurred reading file {}: {e}",
-                src.display()
-            ))
-        })?;
+    fs::create_dir_all(dest)?;
+    for file in fs::read_dir(src)? {
+        let file = file?;
         let from = file.path();
         let to = dest.join(file.file_name());
         if from.is_dir() {
             copy_dir(&from, &to)?;
         } else {
-            fs::copy(from, to).map_err(|e| {
-                QFError::Message(format!("An error occurred copying files to directory: {e}"))
-            })?;
+            fs::copy(from, to)?;
         }
     }
     Ok(())

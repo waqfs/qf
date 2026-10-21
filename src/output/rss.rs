@@ -30,11 +30,9 @@ impl OutputFormatter for RSSOutputFormatter {
 
         for document in documents {
             let dir = stage.join(document.route.trim_matches('/'));
-            fs::create_dir_all(&dir)
-                .map_err(|e| QFError::Message(format!("Failed to create output directory: {e}")))?;
+            fs::create_dir_all(&dir)?;
             let text = write_document(document, site, config);
-            fs::write(dir.join("rss.xml"), text)
-                .map_err(|e| QFError::Message(format!("Failed to write file: {e}")))?;
+            fs::write(dir.join("rss.xml"), text)?;
         }
 
         Ok(())
