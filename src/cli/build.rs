@@ -4,6 +4,7 @@ use crate::{cli::CLIArguments, compiler, error::QFError};
 
 const DEFAULT_CONFIG: &str = include_str!("default/qf.config.json");
 const DEFAULT_STYLESHEET: &str = include_str!("default/style.css");
+const DEFAULT_INDEX: &str = include_str!("default/index.qf");
 
 pub fn run(arguments: CLIArguments) -> Result<(), QFError> {
     let _ = compiler::build(&arguments.root)?;
@@ -28,6 +29,16 @@ pub fn init(arguments: CLIArguments) -> Result<(), QFError> {
     let stylesheet_path = static_path.join("style.css");
     if !stylesheet_path.exists() {
         fs::write(stylesheet_path, DEFAULT_STYLESHEET)?;
+    }
+
+    let content_path = arguments.root.join("content");
+    if !content_path.exists() {
+        fs::create_dir_all(&content_path)?;
+    }
+
+    let index_qf_path = content_path.join("index.qf");
+    if !index_qf_path.exists() {
+        fs::write(index_qf_path, DEFAULT_INDEX)?;
     }
     Ok(())
 }
