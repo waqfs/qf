@@ -147,7 +147,7 @@ fn patch_handles(site: &mut Site) -> Result<(), QFError> {
                 Block::BlockQuote(inlines) | Block::Paragraph(inlines) => {
                     patch_links(&resolved_handles, inlines)?
                 }
-                Block::Heading { level, content } => patch_links(&resolved_handles, content)?,
+                Block::Heading { level: _, content } => patch_links(&resolved_handles, content)?,
                 Block::OrderedList(items) | Block::UnorderedList(items) => {
                     for item in items {
                         patch_links(&resolved_handles, item)?;

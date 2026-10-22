@@ -20,7 +20,7 @@ impl OutputFormatter for TextOutputFormatter {
         "text"
     }
 
-    fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError> {
+    fn write(&self, site: &Site, _config: &Config, stage: &Path) -> Result<(), QFError> {
         for document in &site.documents {
             let dir = stage.join(document.route.trim_matches('/'));
             fs::create_dir_all(&dir)?;

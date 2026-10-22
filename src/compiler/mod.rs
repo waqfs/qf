@@ -12,7 +12,7 @@ use crate::{
     output::outputs,
     parser, staging,
 };
-use std::{collections::BTreeMap, path::Path, println};
+use std::path::Path;
 
 pub fn build(root: &Path) -> Result<(), QFError> {
     let (config, site) = compile(root)?;
