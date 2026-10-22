@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, path::Path};
+use std::collections::BTreeSet;
 
 use crate::{
     compiler::model::site::{Block, DocumentType, Image, ImageAlt, LinkedIndex, MetadataFields},
@@ -6,7 +6,7 @@ use crate::{
     parser::inline,
 };
 
-pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
+pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
     let mut blocks: Vec<Block> = Vec::new();
     let mut index = 0;
 
@@ -21,9 +21,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
 
         // Linked Indexes
         if line_is_linked_index(trimmed).is_some() {
-            blocks.push(Block::LinkedIndex(parse_linked_index(
-                path, trimmed, index,
-            )?));
+            blocks.push(Block::LinkedIndex(parse_linked_index(trimmed, index)?));
             index += 1;
             continue;
         }
@@ -33,8 +31,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
             let count = trimmed.chars().take_while(|chr| *chr == '#').count();
             if count > 6 || trimmed.chars().nth(count) != Some(' ') {
                 return Err(QFError::Message(format!(
-                    "{}:{}: Maximum of 6 hashes and a space required for headers",
-                    path.display(),
+                    "line {}: Maximum of 6 hashes and a space required for headers",
                     index + 1
                 )));
             }
@@ -100,8 +97,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
             }
             if index == lines.len() {
                 return Err(QFError::Message(format!(
-                    "{}:{}: Code block not closed",
-                    path.display(),
+                    "line {}: Code block not closed",
                     start_index
                 )));
             }
@@ -127,8 +123,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
                     caption = Some(value);
                 } else {
                     return Err(QFError::Message(format!(
-                        "{}:{}: Unknown image property {property}",
-                        path.display(),
+                        "line {}: Unknown image property {property}",
                         index + 1
                     )));
                 }
@@ -137,8 +132,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
 
             let alt = alt.ok_or_else(|| {
                 QFError::Message(format!(
-                    "{}:{}: Image requires an alt property or be marked decorative",
-                    path.display(),
+                    "line {}: Image requires an alt property or be marked decorative",
                     index + 1
                 ))
             })?;
@@ -202,10 +196,10 @@ fn line_is_linked_index(line: &str) -> Option<DocumentType> {
     }
 }
 
-fn parse_linked_index(path: &Path, text: &str, line: usize) -> Result<LinkedIndex, QFError> {
+fn parse_linked_index(text: &str, line: usize) -> Result<LinkedIndex, QFError> {
     let mut index = LinkedIndex::new(line_is_linked_index(text).unwrap());
     let mut visited: BTreeSet<&str> = BTreeSet::new();
-    let error = |message: String| QFError::Message(format!("{}:{line}: {message}", path.display()));
+    let error = |message: String| QFError::Message(format!(" {line}: {message}"));
 
     for option in text.split_whitespace().skip(1) {
         let (key, value) = option

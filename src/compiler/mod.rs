@@ -38,11 +38,7 @@ fn compile(root: &Path) -> Result<(Config, Site), QFError> {
                 documents.push(document);
             }
             Err(error) => {
-                return Err(QFError::Message(format!(
-                    "Error parsing file {}: {}",
-                    file.display(),
-                    error
-                )));
+                return Err(QFError::Message(format!("{}: {error}", file.display())));
             }
         }
     }
