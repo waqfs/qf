@@ -1,0 +1,30 @@
+@type page
+@title John Doe | Designer & Developer
+@summary Portfolio of John Doe, a designer and developer creating thoughtful, accessible experiences for the web.
+
+# John Doe
+
+Designer and developer creating thoughtful, accessible experiences for the web.
+
+I work across design and front-end development, turning ideas into simple, useful products.
+
+## Selected Work
+
+@projects fields=title,summary limit=2
+
+Want to see more? [View all projects](::projects)
+
+## About
+
+I'm a designer and developer interested in the space where visual design, typography, and software meet. I enjoy building small, durable things for the web and working with people who care about the details.
+
+## Recent Articles
+
+@articles fields=date,title,summary limit=2
+
+Want to read more? [View all articles](::articles)
+
+## Elsewhere
+- [GitHub](https://github.com/johndoe)
+- [LinkedIn](https://linkedin.com/in/johndoe)
+- [Email](mailto:john.doe@example.com)

@@ -1,0 +1,17 @@
+@type project
+@title Field Notes
+@summary A publishing platform for independent writers.
+
+# About
+
+Field Notes is a publishing platform designed for independent writers who want a simple place to publish their work.
+
+I developed the front-end and design system used across the site, with an emphasis on readability, consistency, and flexible content.
+
+The interface was intentionally kept out of the way so that writing remained the focus.
+
+# My Role
+
+I worked on the front-end architecture and translated the visual language into a reusable set of components.
+
+I also helped establish typography, spacing, and layout patterns that could be shared across articles, author pages, and supporting content.

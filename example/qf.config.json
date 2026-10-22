@@ -1,0 +1,10 @@
+{
+  "title": "My Portfolio",
+  "base_url": "https://localhost:8080",
+  "stylesheet": "/style.css",
+  "timezone": "America/New_York",
+  "language": "en",
+  "content_dir": "content",
+  "output_dir": "dist",
+  "static_dir": "static"
+}
