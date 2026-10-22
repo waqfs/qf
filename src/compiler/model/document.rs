@@ -5,7 +5,6 @@ use crate::{compiler::model::site::Document, config::Config};
 pub struct Site {
     pub config: Config,
     pub documents: Vec<Document>,
-    pub routes: BTreeMap<String, usize>,
     pub articles: Vec<usize>,
     pub projects: Vec<usize>,
     pub article_index: Option<usize>,

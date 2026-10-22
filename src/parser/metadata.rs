@@ -102,10 +102,10 @@ pub fn parse(lines: &[&str], config: &Config) -> Result<(Metadata, usize), QFErr
     Ok((
         Metadata {
             doc_type: doc_type.ok_or_else(|| {
-                QFError::Message(format!("Missing required 'type' metadata property"))
+                QFError::Message("Missing required 'type' metadata property".into())
             })?,
             title: title.ok_or_else(|| {
-                QFError::Message(format!("Missing required 'title' metadata property"))
+                QFError::Message("Missing required 'title' metadata property".into())
             })?,
             summary,
             date,

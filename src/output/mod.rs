@@ -7,14 +7,13 @@ pub mod rss;
 pub mod text;
 
 pub trait OutputFormatter {
-    fn name(&self) -> &'static str;
     fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError>;
 }
 
 pub fn outputs() -> Vec<Box<dyn OutputFormatter>> {
-    return vec![
+    vec![
         Box::new(html::HTMLOutputFormatter),
         Box::new(text::TextOutputFormatter),
         Box::new(rss::RSSOutputFormatter),
-    ];
+    ]
 }

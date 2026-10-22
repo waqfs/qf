@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, path::Path, usize};
+use std::{collections::BTreeMap, path::Path};
 
 use crate::{
     compiler::model::{
@@ -56,7 +56,6 @@ pub fn build_index(
     Ok(Site {
         config,
         documents,
-        routes,
         articles,
         projects,
         article_index,
@@ -93,16 +92,16 @@ pub fn process_index(site: &mut Site) -> Result<(), QFError> {
 
     for (pos, index) in site.articles.clone().into_iter().enumerate() {
         site.documents[index].next = article_routes.get(pos + 1).cloned();
-        site.documents[index].all = site.article_index.map_or(None, |all_index| {
-            Some(site.documents[all_index].route.clone())
-        });
+        site.documents[index].all = site
+            .article_index
+            .map(|all_index| site.documents[all_index].route.clone());
         site.documents[index].previous = pos.checked_sub(1).map(|p| article_routes[p].clone());
     }
     for (pos, index) in site.projects.clone().into_iter().enumerate() {
         site.documents[index].next = project_routes.get(pos + 1).cloned();
-        site.documents[index].all = site.project_index.map_or(None, |all_index| {
-            Some(site.documents[all_index].route.clone())
-        });
+        site.documents[index].all = site
+            .project_index
+            .map(|all_index| site.documents[all_index].route.clone());
         site.documents[index].previous = pos.checked_sub(1).map(|p| project_routes[p].clone());
     }
 
@@ -144,7 +143,7 @@ fn patch_handles(site: &mut Site) -> Result<(), QFError> {
     for document in &mut site.documents {
         for block in &mut document.blocks {
             match block {
-                Block::BlockQuote(inlines) | Block::Paragraph(inlines) => {
+                Block::Quote(inlines) | Block::Paragraph(inlines) => {
                     patch_links(&resolved_handles, inlines)?
                 }
                 Block::Heading { level: _, content } => patch_links(&resolved_handles, content)?,
@@ -165,31 +164,28 @@ fn patch_links(
     inline: &mut Vec<Inline>,
 ) -> Result<(), QFError> {
     for item in inline {
-        match item {
-            Inline::Link { label, href } => {
-                if href.starts_with("::") {
-                    let handle = parse_handle(&href);
-                    let resolved_handle = handles
-                        .iter()
-                        .find(|(_, document)| document.handle == handle.name);
+        if let Inline::Link { label, href } = item
+            && href.starts_with("::")
+        {
+            let handle = parse_handle(href);
+            let resolved_handle = handles
+                .iter()
+                .find(|(_, document)| document.handle == handle.name);
 
-                    match resolved_handle {
-                        Some((_, document)) => {
-                            *href = format!("{}#{}", document.route, handle.suffix);
-                            if label.is_empty() {
-                                label.push(Inline::Text(document.title.clone()));
-                            }
-                        }
-                        None => {
-                            return Err(QFError::Message(format!(
-                                "Error resolving handle: {}",
-                                href
-                            )));
-                        }
+            match resolved_handle {
+                Some((_, document)) => {
+                    *href = format!("{}#{}", document.route, handle.suffix);
+                    if label.is_empty() {
+                        label.push(Inline::Text(document.title.clone()));
                     }
                 }
+                None => {
+                    return Err(QFError::Message(format!(
+                        "Error resolving handle: {}",
+                        href
+                    )));
+                }
             }
-            _ => {}
         }
     }
     Ok(())
@@ -218,7 +214,7 @@ fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
         .filter(|document| {
             index
                 .starred
-                .map_or(true, |starred| document.metadata.starred == starred)
+                .is_none_or(|starred| document.metadata.starred == starred)
         })
         .collect();
 

@@ -13,10 +13,6 @@ use crate::{
 pub struct HTMLOutputFormatter;
 
 impl OutputFormatter for HTMLOutputFormatter {
-    fn name(&self) -> &'static str {
-        "html"
-    }
-
     fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError> {
         for document in &site.documents {
             let dir = stage.join(document.route.trim_matches('/'));
@@ -147,12 +143,12 @@ fn write_block(block: &Block, output: &mut String) {
         }
         Block::UnorderedList(items) => write_list("ul", items, output),
         Block::OrderedList(items) => write_list("ol", items, output),
-        Block::BlockQuote(inlines) => {
+        Block::Quote(inlines) => {
             output.push_str("<blockquote><p>");
             write_inline(inlines, output);
             output.push_str("</p></blockquote>\n");
         }
-        Block::CodeBlock { language, code } => {
+        Block::Code { language, code } => {
             output.push_str("<pre><code");
             if let Some(language) = language {
                 output.push_str(&format!(
@@ -207,9 +203,9 @@ fn write_inline(inlines: &[Inline], output: &mut String) {
                 write_inline(text, output);
                 output.push_str("</strong>");
             }
-            Inline::Code(code) => output.push_str(&format!("<code>{}</code>", html_escape(&code))),
+            Inline::Code(code) => output.push_str(&format!("<code>{}</code>", html_escape(code))),
             Inline::Link { label, href } => {
-                output.push_str(&format!("<a href=\"{}\">", html_escape_attribute(&href)));
+                output.push_str(&format!("<a href=\"{}\">", html_escape_attribute(href)));
                 write_inline(label, output);
                 output.push_str("</a>");
             }

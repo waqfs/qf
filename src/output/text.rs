@@ -16,10 +16,6 @@ use crate::{
 pub struct TextOutputFormatter;
 
 impl OutputFormatter for TextOutputFormatter {
-    fn name(&self) -> &'static str {
-        "text"
-    }
-
     fn write(&self, site: &Site, _config: &Config, stage: &Path) -> Result<(), QFError> {
         for document in &site.documents {
             let dir = stage.join(document.route.trim_matches('/'));
@@ -64,7 +60,7 @@ fn write_block(block: &Block, output: &mut String) {
             output.push_str(&heading);
             output.push('\n');
             output.push_str(&if *level == 1 { "-" } else { "~" }.repeat(heading.chars().count()));
-            output.push_str("\n");
+            output.push('\n');
         }
         Block::UnorderedList(items) => {
             for item in items {
@@ -83,14 +79,14 @@ fn write_block(block: &Block, output: &mut String) {
             }
             output.push('\n');
         }
-        Block::BlockQuote(inlines) => {
+        Block::Quote(inlines) => {
             output.push_str("> ");
             write_inlines(inlines, output);
             output.push_str("\n\n");
         }
-        Block::CodeBlock { language, code } => {
+        Block::Code { language, code } => {
             if let Some(language) = &language {
-                output.push_str("[");
+                output.push('[');
                 output.push_str(language);
                 output.push_str("]\n");
             }

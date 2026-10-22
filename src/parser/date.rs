@@ -48,7 +48,7 @@ pub fn sort(a: Option<DateTime<Utc>>, b: Option<DateTime<Utc>>) -> Ordering {
 fn tz_to_utc(local: NaiveDateTime, timezone: Tz) -> Result<DateTime<Utc>, QFError> {
     match timezone.from_local_datetime(&local) {
         LocalResult::Single(result) => Ok(result.with_timezone(&Utc)),
-        LocalResult::Ambiguous(_, __) => Err(QFError::Message(
+        LocalResult::Ambiguous(_first, _second) => Err(QFError::Message(
             "Default timezone is ambiguous.".to_string(),
         )),
         LocalResult::None => Err(QFError::Message("Default timezone is invalid.".to_string())),
