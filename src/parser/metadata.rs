@@ -31,14 +31,19 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
             break;
         }
 
-        let (key, value) = line[1..]
-            .split_once(' ')
-            .ok_or_else(|| QFError::Message(format!("Failed to parse metadata property")))?;
+        let (key, value) = line[1..].split_once(' ').ok_or_else(|| {
+            QFError::Message(format!(
+                "{}:{}: Failed to parse metadata property",
+                path.display(),
+                index + 1
+            ))
+        })?;
 
         if !seen.insert(key.to_string()) {
             return Err(QFError::Message(format!(
-                "Duplicate metadata property {key} in {}",
-                path.display()
+                "{}:{}: Duplicate metadata property {key}",
+                path.display(),
+                index + 1
             )));
         }
 
@@ -50,8 +55,9 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
                     "article" => DocumentType::Article,
                     unknown => {
                         return Err(QFError::Message(format!(
-                            "Unknown document type {unknown} in {}",
-                            path.display()
+                            "{}:{}: Unknown document type {unknown}",
+                            path.display(),
+                            index + 1
                         )));
                     }
                 })
@@ -67,8 +73,9 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
                     "false" => false,
                     unknown => {
                         return Err(QFError::Message(format!(
-                            "Unknown starred type {unknown} in {}",
-                            path.display()
+                            "{}:{}: Unknown starred type {unknown}",
+                            path.display(),
+                            index + 1
                         )));
                     }
                 }
@@ -79,16 +86,18 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
                     "false" => false,
                     unknown => {
                         return Err(QFError::Message(format!(
-                            "Unknown index type {unknown} in {}",
-                            path.display()
+                            "{}:{}: Unknown index type {unknown}",
+                            path.display(),
+                            index + 1
                         )));
                     }
                 }
             }
             unknown => {
                 return Err(QFError::Message(format!(
-                    "Unknown metadata property {unknown} in {}",
-                    path.display()
+                    "{}:{}: Unknown metadata property {unknown}",
+                    path.display(),
+                    index + 1
                 )));
             }
         }
@@ -100,13 +109,13 @@ pub fn parse(path: &Path, lines: &[&str], config: &Config) -> Result<(Metadata, 
         Metadata {
             doc_type: doc_type.ok_or_else(|| {
                 QFError::Message(format!(
-                    "Missing required 'type' metadata property in {}",
+                    "{}: Missing required 'type' metadata property",
                     path.display()
                 ))
             })?,
             title: title.ok_or_else(|| {
                 QFError::Message(format!(
-                    "Missing required 'title' metadata property in {}",
+                    "{}: Missing required 'title' metadata property",
                     path.display()
                 ))
             })?,

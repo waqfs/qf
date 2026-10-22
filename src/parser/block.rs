@@ -21,7 +21,9 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
 
         // Linked Indexes
         if line_is_linked_index(trimmed).is_some() {
-            blocks.push(Block::LinkedIndex(parse_linked_index(trimmed)?));
+            blocks.push(Block::LinkedIndex(parse_linked_index(
+                path, trimmed, index,
+            )?));
             index += 1;
             continue;
         }
@@ -31,8 +33,9 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
             let count = trimmed.chars().take_while(|chr| *chr == '#').count();
             if count > 6 || trimmed.chars().nth(count) != Some(' ') {
                 return Err(QFError::Message(format!(
-                    "Maximum of 6 hashes and a space required for headers in {}",
-                    path.display()
+                    "{}:{}: Maximum of 6 hashes and a space required for headers",
+                    path.display(),
+                    index + 1
                 )));
             }
             blocks.push(Block::Heading {
@@ -86,6 +89,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
                 Some(language.trim().to_string())
             };
             index += 1;
+            let start_index = index;
             let mut code = String::new();
             while index < lines.len() && lines[index].trim() != "```" {
                 if !code.is_empty() {
@@ -96,8 +100,9 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
             }
             if index == lines.len() {
                 return Err(QFError::Message(format!(
-                    "Code block not closed in {}",
-                    path.display()
+                    "{}:{}: Code block not closed",
+                    path.display(),
+                    start_index
                 )));
             }
             index += 1;
@@ -122,8 +127,9 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
                     caption = Some(value);
                 } else {
                     return Err(QFError::Message(format!(
-                        "Unknown image property {property} in {}",
-                        path.display()
+                        "{}:{}: Unknown image property {property}",
+                        path.display(),
+                        index + 1
                     )));
                 }
                 index += 1;
@@ -131,8 +137,9 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, QFError> {
 
             let alt = alt.ok_or_else(|| {
                 QFError::Message(format!(
-                    "Image requires an alt property in {}",
-                    path.display()
+                    "{}:{}: Image requires an alt property or be marked decorative",
+                    path.display(),
+                    index + 1
                 ))
             })?;
             blocks.push(Block::Image(Image {
@@ -195,38 +202,36 @@ fn line_is_linked_index(line: &str) -> Option<DocumentType> {
     }
 }
 
-fn parse_linked_index(text: &str) -> Result<LinkedIndex, QFError> {
+fn parse_linked_index(path: &Path, text: &str, line: usize) -> Result<LinkedIndex, QFError> {
     let mut index = LinkedIndex::new(line_is_linked_index(text).unwrap());
     let mut visited: BTreeSet<&str> = BTreeSet::new();
+    let error = |message: String| QFError::Message(format!("{}:{line}: {message}", path.display()));
 
     for option in text.split_whitespace().skip(1) {
         let (key, value) = option
             .split_once('=')
-            .ok_or_else(|| QFError::Message(format!("expected key=value for {option}")))?;
+            .ok_or_else(|| error(format!("expected key=value for {option}")))?;
 
         if !visited.insert(key) {
-            return Err(QFError::Message(format!("duplicate key {key}")));
+            return Err(error(format!("duplicate key {key}")));
         }
 
         match key {
             "limit" => {
                 if value.is_empty() || !value.chars().all(|chr| chr.is_ascii_digit()) {
-                    return Err(QFError::Message(format!(
-                        "key 'limit' requires positive integer"
-                    )));
+                    return Err(error(format!("key 'limit' requires positive integer")));
                 }
-                index.limit = Some(value.parse().map_err(|err| {
-                    QFError::Message(format!("key 'limit' failed to parse integer: {err}"))
-                })?);
+                index.limit =
+                    Some(value.parse().map_err(|err| {
+                        error(format!("key 'limit' failed to parse integer: {err}"))
+                    })?);
             }
             "starred" => {
                 index.starred = Some(match value {
                     "true" => true,
                     "false" => false,
                     unknown => {
-                        return Err(QFError::Message(format!(
-                            "key 'starred' has unknown value {unknown}"
-                        )));
+                        return Err(error(format!("key 'starred' has unknown value {unknown}")));
                     }
                 })
             }
@@ -238,20 +243,16 @@ fn parse_linked_index(text: &str) -> Result<LinkedIndex, QFError> {
                         "summary" => MetadataFields::Summary,
                         "date" => MetadataFields::Date,
                         unknown => {
-                            return Err(QFError::Message(format!(
-                                "key 'fields' has unknown value {unknown}"
-                            )));
+                            return Err(error(format!("key 'fields' has unknown value {unknown}")));
                         }
                     };
                     if index.fields.contains(&field) {
-                        return Err(QFError::Message(format!(
-                            "key 'fields' has duplicate value"
-                        )));
+                        return Err(error(format!("key 'fields' has duplicate value")));
                     }
                     index.fields.push(field);
                 }
             }
-            unknown => return Err(QFError::Message(format!("unknown option key '{unknown}'"))),
+            unknown => return Err(error(format!("unknown option key '{unknown}'"))),
         }
     }
 
