@@ -90,5 +90,17 @@ While this is still in development, compile from source and point to your root d
 cargo run build --root /path/to/portfolio
 ```
 
+#### Example
+There is an included AI-generated demo portfolio in this repository to showcase the structure, features, and outputs. Simply point the build to the `example` directory:
+```zsh
+cargo run build --root example
+```
+
+Then serve using your favorite tool, like:
+```zsh
+python3 -m http.server 8080 -d example/dist
+npx serve example/dist
+```
+
 ### License
 This project is licensed under GNU GPLv3, so you can use this for whatever, and forks must disclose source and be under the same license. Not that anybody actually gives a shit about code licensing.
