@@ -87,8 +87,11 @@ This language format is used for all types of pages, regardless of export format
 ### Usage
 While this is still in development, compile from source and point to your root directory:
 ```zsh
-cargo run build --root /path/to/portfolio
+cargo run <command> --root /path/to/portfolio
 ```
+Supported `<command>`'s:
+- `init`: initiate a new portfolio in the current directory, or in the `--root` directory
+- `build`: run the build step, parsing and converting `.qf` files, and building the `dist/` directory
 
 ### License
 This project is licensed under GNU GPLv3, so you can use this for whatever, and forks must disclose source and be under the same license. Not that anybody actually gives a shit about code licensing.
