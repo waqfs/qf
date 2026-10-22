@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, ops::Add, path::Path, usize};
+use std::{collections::BTreeMap, path::Path, usize};
 
 use crate::{
     compiler::model::{
@@ -9,6 +9,7 @@ use crate::{
         },
     },
     config::Config,
+    error::QFError,
     parser,
 };
 
@@ -16,7 +17,7 @@ pub fn build_index(
     root: &Path,
     config: Config,
     mut documents: Vec<Document>,
-) -> Result<Site, String> {
+) -> Result<Site, QFError> {
     let mut routes = BTreeMap::new();
     let mut articles = Vec::new();
     let mut projects = Vec::new();
@@ -27,10 +28,10 @@ pub fn build_index(
     for (index, document) in documents.iter_mut().enumerate() {
         document.route = route(document, root, &config);
         if routes.insert(document.route.clone(), index).is_some() {
-            return Err(format!(
+            return Err(QFError::Message(format!(
                 "Error indexing routes, duplicates not allowed: {}",
                 document.route
-            ));
+            )));
         }
 
         if let Some(handle) = &document.metadata.handle {
@@ -64,7 +65,7 @@ pub fn build_index(
     })
 }
 
-pub fn process_index(site: &mut Site) -> Result<(), String> {
+pub fn process_index(site: &mut Site) -> Result<(), QFError> {
     site.articles.sort_by(|a, b| {
         parser::date::sort(
             site.documents[*a].metadata.date,
@@ -127,7 +128,7 @@ pub fn process_index(site: &mut Site) -> Result<(), String> {
     Ok(())
 }
 
-fn patch_handles(site: &mut Site) -> Result<(), String> {
+fn patch_handles(site: &mut Site) -> Result<(), QFError> {
     let mut resolved_handles: BTreeMap<String, DocumentHandle> = BTreeMap::new();
     for (handle, index) in &mut site.handles {
         resolved_handles.insert(
@@ -146,7 +147,7 @@ fn patch_handles(site: &mut Site) -> Result<(), String> {
                 Block::BlockQuote(inlines) | Block::Paragraph(inlines) => {
                     patch_links(&resolved_handles, inlines)?
                 }
-                Block::Heading { level, content } => patch_links(&resolved_handles, content)?,
+                Block::Heading { level: _, content } => patch_links(&resolved_handles, content)?,
                 Block::OrderedList(items) | Block::UnorderedList(items) => {
                     for item in items {
                         patch_links(&resolved_handles, item)?;
@@ -162,7 +163,7 @@ fn patch_handles(site: &mut Site) -> Result<(), String> {
 fn patch_links(
     handles: &BTreeMap<String, DocumentHandle>,
     inline: &mut Vec<Inline>,
-) -> Result<(), String> {
+) -> Result<(), QFError> {
     for item in inline {
         match item {
             Inline::Link { label, href } => {
@@ -180,7 +181,10 @@ fn patch_links(
                             }
                         }
                         None => {
-                            return Err(format!("Error resolving handle: {}", href));
+                            return Err(QFError::Message(format!(
+                                "Error resolving handle: {}",
+                                href
+                            )));
                         }
                     }
                 }

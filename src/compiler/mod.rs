@@ -8,12 +8,13 @@ use crate::{
         model::document::Site,
     },
     config::Config,
+    error::QFError,
     output::outputs,
     parser, staging,
 };
-use std::{collections::BTreeMap, path::Path, println};
+use std::path::Path;
 
-pub fn build(root: &Path) -> Result<(), String> {
+pub fn build(root: &Path) -> Result<(), QFError> {
     let (config, site) = compile(root)?;
     let stage = staging::init_stage(root, &config)?;
 
@@ -26,7 +27,7 @@ pub fn build(root: &Path) -> Result<(), String> {
     Ok(())
 }
 
-fn compile(root: &Path) -> Result<(Config, Site), String> {
+fn compile(root: &Path) -> Result<(Config, Site), QFError> {
     let config = Config::load(root)?;
     let files = source::get_portfolio_files(root, &config)?;
     let mut documents = Vec::new();
@@ -36,7 +37,9 @@ fn compile(root: &Path) -> Result<(Config, Site), String> {
             Ok(document) => {
                 documents.push(document);
             }
-            Err(error) => return Err(format!("Error parsing file {}: {}", file.display(), error)),
+            Err(error) => {
+                return Err(QFError::Message(format!("{}: {error}", file.display())));
+            }
         }
     }
 

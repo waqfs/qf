@@ -1,11 +1,12 @@
-use std::{collections::BTreeSet, path::Path};
+use std::collections::BTreeSet;
 
 use crate::{
     compiler::model::site::{Block, DocumentType, Image, ImageAlt, LinkedIndex, MetadataFields},
+    error::QFError,
     parser::inline,
 };
 
-pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
+pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
     let mut blocks: Vec<Block> = Vec::new();
     let mut index = 0;
 
@@ -20,7 +21,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
 
         // Linked Indexes
         if line_is_linked_index(trimmed).is_some() {
-            blocks.push(Block::LinkedIndex(parse_linked_index(trimmed)?));
+            blocks.push(Block::LinkedIndex(parse_linked_index(trimmed, index)?));
             index += 1;
             continue;
         }
@@ -29,10 +30,10 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
         if trimmed.starts_with('#') {
             let count = trimmed.chars().take_while(|chr| *chr == '#').count();
             if count > 6 || trimmed.chars().nth(count) != Some(' ') {
-                return Err(format!(
-                    "Maximum of 6 hashes and a space required for headers in {}",
-                    path.display()
-                ));
+                return Err(QFError::Message(format!(
+                    "line {}: Maximum of 6 hashes and a space required for headers",
+                    index + 1
+                )));
             }
             blocks.push(Block::Heading {
                 level: count as u8,
@@ -85,6 +86,7 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
                 Some(language.trim().to_string())
             };
             index += 1;
+            let start_index = index;
             let mut code = String::new();
             while index < lines.len() && lines[index].trim() != "```" {
                 if !code.is_empty() {
@@ -94,7 +96,10 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
                 index += 1;
             }
             if index == lines.len() {
-                return Err(format!("Code block not closed in {}", path.display()));
+                return Err(QFError::Message(format!(
+                    "line {}: Code block not closed",
+                    start_index
+                )));
             }
             index += 1;
             blocks.push(Block::CodeBlock { language, code });
@@ -117,16 +122,20 @@ pub fn parse(path: &Path, lines: &[&str]) -> Result<Vec<Block>, String> {
                 } else if let Some(value) = parse_image_property(property, "caption") {
                     caption = Some(value);
                 } else {
-                    return Err(format!(
-                        "Unknown image property {property} in {}",
-                        path.display()
-                    ));
+                    return Err(QFError::Message(format!(
+                        "line {}: Unknown image property {property}",
+                        index + 1
+                    )));
                 }
                 index += 1;
             }
 
-            let alt =
-                alt.ok_or_else(|| format!("Image requires an alt property in {}", path.display()))?;
+            let alt = alt.ok_or_else(|| {
+                QFError::Message(format!(
+                    "line {}: Image requires an alt property or be marked decorative",
+                    index + 1
+                ))
+            })?;
             blocks.push(Block::Image(Image {
                 source,
                 alt,
@@ -187,35 +196,37 @@ fn line_is_linked_index(line: &str) -> Option<DocumentType> {
     }
 }
 
-fn parse_linked_index(text: &str) -> Result<LinkedIndex, String> {
+fn parse_linked_index(text: &str, line: usize) -> Result<LinkedIndex, QFError> {
     let mut index = LinkedIndex::new(line_is_linked_index(text).unwrap());
     let mut visited: BTreeSet<&str> = BTreeSet::new();
+    let error = |message: String| QFError::Message(format!(" {line}: {message}"));
 
     for option in text.split_whitespace().skip(1) {
         let (key, value) = option
             .split_once('=')
-            .ok_or_else(|| format!("expected key=value for {option}"))?;
+            .ok_or_else(|| error(format!("expected key=value for {option}")))?;
 
         if !visited.insert(key) {
-            return Err(format!("duplicate key {key}"));
+            return Err(error(format!("duplicate key {key}")));
         }
 
         match key {
             "limit" => {
                 if value.is_empty() || !value.chars().all(|chr| chr.is_ascii_digit()) {
-                    return Err(format!("key 'limit' requires positive integer"));
+                    return Err(error(format!("key 'limit' requires positive integer")));
                 }
-                index.limit = Some(
-                    value
-                        .parse()
-                        .map_err(|err| format!("key 'limit' failed to parse integer: {err}"))?,
-                );
+                index.limit =
+                    Some(value.parse().map_err(|err| {
+                        error(format!("key 'limit' failed to parse integer: {err}"))
+                    })?);
             }
             "starred" => {
                 index.starred = Some(match value {
                     "true" => true,
                     "false" => false,
-                    unknown => return Err(format!("key 'starred' has unknown value {unknown}")),
+                    unknown => {
+                        return Err(error(format!("key 'starred' has unknown value {unknown}")));
+                    }
                 })
             }
             "fields" => {
@@ -225,15 +236,17 @@ fn parse_linked_index(text: &str) -> Result<LinkedIndex, String> {
                         "title" => MetadataFields::Title,
                         "summary" => MetadataFields::Summary,
                         "date" => MetadataFields::Date,
-                        unknown => return Err(format!("key 'fields' has unknown value {unknown}")),
+                        unknown => {
+                            return Err(error(format!("key 'fields' has unknown value {unknown}")));
+                        }
                     };
                     if index.fields.contains(&field) {
-                        return Err(format!("key 'fields' has duplicate value"));
+                        return Err(error(format!("key 'fields' has duplicate value")));
                     }
                     index.fields.push(field);
                 }
             }
-            unknown => return Err(format!("unknown option key '{unknown}'")),
+            unknown => return Err(error(format!("unknown option key '{unknown}'"))),
         }
     }
 

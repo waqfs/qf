@@ -3,16 +3,20 @@ use std::cmp::Ordering;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Utc, offset::LocalResult};
 use chrono_tz::Tz;
 
-pub fn parse_date(input: &str, default_tz: &str) -> Result<DateTime<Utc>, String> {
+use crate::error::QFError;
+
+pub fn parse_date(input: &str, default_tz: &str) -> Result<DateTime<Utc>, QFError> {
     let input = input.trim();
 
     if let Ok(result) = DateTime::parse_from_rfc3339(input) {
         return Ok(result.with_timezone(&Utc));
     }
 
-    let timezone: Tz = default_tz
-        .parse()
-        .map_err(|e| format!("An error occurred parsing the default timezone: {e}"))?;
+    let timezone: Tz = default_tz.parse().map_err(|e| {
+        QFError::Message(format!(
+            "An error occurred parsing the default timezone: {e}"
+        ))
+    })?;
 
     if let Ok(local) = NaiveDate::parse_from_str(input, "%m/%d/%Y") {
         let local = local
@@ -29,7 +33,7 @@ pub fn parse_date(input: &str, default_tz: &str) -> Result<DateTime<Utc>, String
         return tz_to_utc(local, timezone);
     }
 
-    Err("Invalid date format.".to_string())
+    Err(QFError::Message("Invalid date format.".to_string()))
 }
 
 pub fn sort(a: Option<DateTime<Utc>>, b: Option<DateTime<Utc>>) -> Ordering {
@@ -41,10 +45,12 @@ pub fn sort(a: Option<DateTime<Utc>>, b: Option<DateTime<Utc>>) -> Ordering {
     }
 }
 
-fn tz_to_utc(local: NaiveDateTime, timezone: Tz) -> Result<DateTime<Utc>, String> {
+fn tz_to_utc(local: NaiveDateTime, timezone: Tz) -> Result<DateTime<Utc>, QFError> {
     match timezone.from_local_datetime(&local) {
         LocalResult::Single(result) => Ok(result.with_timezone(&Utc)),
-        LocalResult::Ambiguous(first, second) => Err("Default timezone is ambiguous.".to_string()),
-        LocalResult::None => Err("Default timezone is invalid.".to_string()),
+        LocalResult::Ambiguous(_, __) => Err(QFError::Message(
+            "Default timezone is ambiguous.".to_string(),
+        )),
+        LocalResult::None => Err(QFError::Message("Default timezone is invalid.".to_string())),
     }
 }
