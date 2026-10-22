@@ -33,7 +33,7 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
     body.push_str("<a class=\"skip-link\" href=\"#content\">Skip to content</a>\n");
     body.push_str(&format!(
         "<header><a href=\"/\">{}</a></header>\n",
-        &site.config.title
+        site.config.title
     ));
 
     body.push_str("<main id=\"content\">\n");
