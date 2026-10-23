@@ -1,7 +1,7 @@
 mod cli;
 pub mod compiler;
 mod config;
-mod error;
+pub mod error;
 mod output;
 pub mod parser;
 mod staging;
