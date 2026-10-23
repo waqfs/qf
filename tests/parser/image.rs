@@ -6,17 +6,6 @@ use qf::{
     parser::block::parse,
 };
 
-fn lines(input: &str) -> Vec<&str> {
-    input.lines().collect()
-}
-
-fn assert_err_str(blocks: Result<Vec<Block>, QFError>, error: &str) {
-    let parse_error = blocks.expect_err("expected parse to fail").to_string();
-    assert!(
-        parse_error.ends_with(error),
-        "expected parse error to be {error}, got {parse_error}"
-    );
-}
 fn assert_image(blocks: Vec<Block>) -> Image {
     assert!(
         blocks.len() == 1,
@@ -28,23 +17,6 @@ fn assert_image(blocks: Vec<Block>) -> Image {
         Block::Image(image) => image,
         _ => panic!("expected block to be an Image"),
     }
-}
-fn assert_source(image: &Image, src: &str) {
-    assert_eq!(image.source, src, "expected image source to be {src}");
-}
-fn assert_alt(image: &Image, alt: &str) {
-    match &image.alt {
-        ImageAlt::Decorative => panic!("expected image to have alt text, got decorative"),
-        ImageAlt::Description(desc) => {
-            assert_eq!(desc, alt, "expected image alt to be {alt}, got {desc}")
-        }
-    }
-}
-fn assert_decorative(image: &Image) {
-    assert!(
-        matches!(image.alt, ImageAlt::Decorative),
-        "expected image to be decorative"
-    );
 }
 fn assert_caption(image: &Image, caption: Option<String>) {
     match &image.caption {
@@ -67,6 +39,7 @@ fn assert_caption(image: &Image, caption: Option<String>) {
     }
 }
 
+#[derive(Debug, PartialEq)]
 enum S {
     Alt,
     Decorative,
@@ -93,30 +66,107 @@ fn synth(opts: &Vec<S>) -> Result<Vec<Block>, QFError> {
 }
 
 #[test]
-fn decorative() {
-    let blocks = synth(&vec![S::Decorative]);
-    assert!(blocks.is_ok(), "expected parse to succeed");
+fn valid() {
+    let cases = [
+        ("decorative", &vec![S::Decorative]),
+        ("alt", &vec![S::Alt]),
+        ("alt-caption", &vec![S::Alt, S::Caption]),
+        ("caption-alt", &vec![S::Caption, S::Alt]),
+    ];
+    for (name, config) in cases {
+        let blocks = synth(config);
+        assert!(
+            blocks.is_ok(),
+            "expected fixture valid-{name} to succeed, got {blocks:?}"
+        );
+        let image = assert_image(blocks.unwrap());
+        assert_eq!(
+            image.source, IMAGE_SOURCE,
+            "expected image source to be {}",
+            IMAGE_SOURCE
+        );
 
-    let image = assert_image(blocks.unwrap());
-    assert_source(&image, "example.png");
-    assert_decorative(&image);
-    assert_caption(&image, None);
+        if config.contains(&S::Decorative) {
+            assert!(
+                matches!(image.alt, ImageAlt::Decorative),
+                "expected image to be decorative"
+            );
+        }
+        if config.contains(&S::Alt) {
+            match &image.alt {
+                ImageAlt::Decorative => panic!("expected image to have alt text, got decorative"),
+                ImageAlt::Description(desc) => {
+                    assert_eq!(
+                        desc, IMAGE_ALT,
+                        "expected image alt to be {}, got {desc}",
+                        IMAGE_ALT
+                    );
+                }
+            }
+        }
+        if config.contains(&S::Caption) {
+            assert_caption(&image, Some(IMAGE_CAPTION.to_string()));
+        } else {
+            assert_caption(&image, None);
+        }
+    }
 }
 
 #[test]
-fn decorative_caption() {
-    let blocks = synth(&vec![S::Decorative, S::Caption]);
-    assert_err_str(
-        blocks,
-        "Image already marked decorative and cannot have a caption",
-    );
-}
-
-#[test]
-fn caption_decorative() {
-    let blocks = synth(&vec![S::Caption, S::Decorative]);
-    assert_err_str(
-        blocks,
-        "Image already has a caption and cannot be marked decorative",
-    );
+fn invalid() {
+    let cases = [
+        (
+            "decorative-alt",
+            &vec![S::Decorative, S::Alt],
+            "Image already marked decorative and cannot have an alt description",
+        ),
+        (
+            "alt-decorative",
+            &vec![S::Alt, S::Decorative],
+            "Image already has an alt description and cannot be marked decorative",
+        ),
+        (
+            "decorative-caption",
+            &vec![S::Decorative, S::Caption],
+            "Image already marked decorative and cannot have a caption",
+        ),
+        (
+            "caption-decorative",
+            &vec![S::Caption, S::Decorative],
+            "Image already has a caption and cannot be marked decorative",
+        ),
+        (
+            "decorative-decorative",
+            &vec![S::Decorative, S::Decorative],
+            "Image should not be marked decorative multiple times",
+        ),
+        (
+            "alt-alt",
+            &vec![S::Alt, S::Alt],
+            "Image cannot have multiple alt descriptions",
+        ),
+        (
+            "caption-caption",
+            &vec![S::Caption, S::Caption],
+            "Image cannot have multiple captions",
+        ),
+        (
+            "caption",
+            &vec![S::Caption],
+            "Image requires an alt property or be marked decorative",
+        ),
+        (
+            "none",
+            &vec![],
+            "Image requires an alt property or be marked decorative",
+        ),
+    ];
+    for (name, config, error) in cases {
+        let blocks = synth(config);
+        let parse_error = blocks.expect_err("expected parse to fail").to_string();
+        assert!(
+            parse_error.ends_with(error),
+            "expected fixture invalid-{name} to fail with error {error}, got {parse_error}"
+        );
+    }
 }
