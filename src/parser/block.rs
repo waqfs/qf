@@ -116,10 +116,52 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
             while index < lines.len() && !lines[index].trim().is_empty() {
                 let property = lines[index].trim();
                 if property == "decorative" {
-                    alt = Some(ImageAlt::Decorative);
+                    match alt {
+                        Some(ImageAlt::Decorative) => {
+                            return Err(QFError::Message(format!(
+                                "line {}: Image should not be marked decorative multiple times",
+                                index + 1
+                            )));
+                        }
+                        Some(ImageAlt::Description(_)) => {
+                            return Err(QFError::Message(format!(
+                                "line {}: Image already has an alt description and cannot be marked decorative",
+                                index + 1
+                            )));
+                        }
+                        None => alt = Some(ImageAlt::Decorative),
+                    }
                 } else if let Some(value) = parse_image_property(property, "alt") {
-                    alt = Some(ImageAlt::Description(value));
+                    match alt {
+                        Some(ImageAlt::Decorative) => {
+                            return Err(QFError::Message(format!(
+                                "line {}: Image already marked decorative and cannot have an alt description",
+                                index + 1
+                            )));
+                        }
+                        Some(ImageAlt::Description(_)) => {
+                            return Err(QFError::Message(format!(
+                                "line {}: Image cannot have multiple alt descriptions",
+                                index + 1
+                            )));
+                        }
+                        None => {
+                            if value.trim().is_empty() {
+                                return Err(QFError::Message(format!(
+                                    "line {}: Image alt description cannot be empty, use 'decorative' instead",
+                                    index + 1
+                                )));
+                            }
+                            alt = Some(ImageAlt::Description(value));
+                        }
+                    }
                 } else if let Some(value) = parse_image_property(property, "caption") {
+                    if caption.is_some() {
+                        return Err(QFError::Message(format!(
+                            "line {}: Image cannot have multiple captions",
+                            index + 1
+                        )));
+                    }
                     caption = Some(value);
                 } else {
                     return Err(QFError::Message(format!(
