@@ -1,5 +1,5 @@
 mod cli;
-mod compiler;
+pub mod compiler;
 mod config;
 mod error;
 mod output;
