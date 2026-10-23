@@ -51,9 +51,9 @@ const IMAGE_ALT: &str = "alt text";
 const IMAGE_CAPTION: &str = "caption text";
 
 fn synth(opts: &Vec<S>) -> Result<Vec<Block>, QFError> {
-    let header = format!("@image {}\n", &IMAGE_SOURCE);
-    let alt = format!("alt=\"{}\"\n", &IMAGE_ALT);
-    let caption = format!("caption=\"{}\"\n", &IMAGE_CAPTION);
+    let header = format!("@image {}\n", IMAGE_SOURCE);
+    let alt = format!("alt=\"{}\"\n", IMAGE_ALT);
+    let caption = format!("caption=\"{}\"\n", IMAGE_CAPTION);
     let mut lines: Vec<&str> = vec![header.as_str()];
     for opt in opts {
         match opt {
