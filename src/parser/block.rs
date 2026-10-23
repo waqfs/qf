@@ -29,9 +29,9 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
         // Headers
         if trimmed.starts_with('#') {
             let count = trimmed.chars().take_while(|chr| *chr == '#').count();
-            if count > 6 || trimmed.chars().nth(count) != Some(' ') {
+            if count > 5 || trimmed.chars().nth(count) != Some(' ') {
                 return Err(QFError::Message(format!(
-                    "line {}: Maximum of 6 hashes and a space required for headers",
+                    "line {}: Maximum of 5 hashes and a space required for headers",
                     index + 1
                 )));
             }
