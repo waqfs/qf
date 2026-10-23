@@ -1,0 +1,52 @@
+@type article
+@title Building Smaller Websites
+@summary Why simple websites are often faster, easier to maintain, and more pleasant to use.
+@date 10/22/2026
+@author John Doe
+@handle building-smaller-websites
+
+# Building Smaller Websites
+
+It is easy for a small website to become complicated.
+
+A few pages become a framework. A little interactivity becomes a client-side application. A handful of styles become a design system with dozens of components.
+
+Sometimes that complexity is justified. Often, it is not.
+
+For personal sites, portfolios, documentation, and many content-focused projects, plain HTML and CSS can take you surprisingly far.
+
+## Start With the Content
+
+I like to begin by asking what the page actually needs to communicate.
+
+If the answer is a heading, a few paragraphs, some links, and a handful of images, then the implementation should probably remain close to that structure.
+
+HTML already provides headings, paragraphs, lists, links, figures, navigation, and articles. Using those elements directly keeps the page understandable both to browsers and to people reading the source.
+
+## Fewer Moving Parts
+
+Every dependency introduces another thing that can change.
+
+Libraries are updated. APIs are deprecated. Build configurations evolve. Tooling that felt convenient today may become maintenance work several years from now.
+
+A smaller stack does not eliminate maintenance, but it reduces the number of places where problems can appear.
+
+This is one reason I enjoy building content-oriented tools. The source can stay pleasant to write while the final output remains ordinary HTML and CSS.
+
+I wrote more about that idea in [Plain Text as a Publishing Format](::plain-text-publishing).
+
+## Performance Comes Naturally
+
+The easiest kilobyte to optimize is the one you never send.
+
+A document that begins as semantic HTML and uses a modest stylesheet tends to perform well without requiring a separate performance project.
+
+That does not mean every site should avoid JavaScript. It means JavaScript can be added where it provides something useful rather than being assumed as the foundation.
+
+## Build What the Site Needs
+
+There is no prize for using the smallest possible technology stack.
+
+There is value, however, in choosing a stack proportional to the problem.
+
+For many websites, simplicity is not a limitation. It is a feature.

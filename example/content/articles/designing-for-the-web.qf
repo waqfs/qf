@@ -1,0 +1,54 @@
+@type article
+@title Designing for the Web That Already Exists
+@summary A case for treating browser conventions, accessibility, and familiar interactions as useful design materials.
+@date 10/08/2026
+@author John Doe
+@handle designing-for-the-web
+
+# Designing for the Web That Already Exists
+
+Web design often begins with the question, "What can we invent?"
+
+I think another useful question is, "What does the web already do well?"
+
+Browsers come with decades of conventions: links look and behave like links, headings create structure, forms have familiar controls, and URLs can point directly to information.
+
+Those conventions are not obstacles to design. They are materials we can design with.
+
+## Familiarity Has Value
+
+A familiar interaction requires less explanation.
+
+People already know that underlined text is probably a link. They understand that a browser's Back button should take them somewhere meaningful. They expect text to be selectable and pages to respond to zoom.
+
+When a design preserves these expectations, the interface becomes easier to understand before the user has learned anything about the site.
+
+## Accessibility Benefits Too
+
+Semantic HTML gives browsers and assistive technologies useful information about a document.
+
+A heading should be a heading because it describes structure, not merely because it needs larger text.
+
+A navigation region should be navigation because that meaning helps people move through the page.
+
+Many accessibility improvements begin with choosing the correct native element and then resisting the urge to replace its behavior unnecessarily.
+
+## Progressive Enhancement
+
+I prefer to begin with a page that works as a document.
+
+From there, enhancements can be layered on top.
+
+If an interaction benefits from JavaScript, add it. If a browser feature can improve presentation, use it. But the underlying content should remain available when those enhancements are unavailable.
+
+This approach also tends to produce simpler systems, something I explored in [Building Smaller Websites](::building-smaller-websites).
+
+## Design With the Platform
+
+The browser is not an empty canvas.
+
+It already knows how to lay out text, follow links, navigate history, submit forms, display media, and adapt to user preferences.
+
+Good web design can take advantage of those capabilities rather than rebuilding them from scratch.
+
+Sometimes the most durable design decision is simply to let the web behave like the web.

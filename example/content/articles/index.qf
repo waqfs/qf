@@ -1,0 +1,9 @@
+@type article
+@title John Doe | Articles
+@summary An index of all my written articles.
+@index true
+@handle articles
+
+# Articles
+
+@articles fields=date,title,summary

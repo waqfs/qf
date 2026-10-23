@@ -1,0 +1,9 @@
+@type project
+@title Projects
+@summary An index of all my projects.
+@index true
+@handle projects
+
+# Projects
+
+@projects fields=date,title,summary

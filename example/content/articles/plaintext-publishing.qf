@@ -1,0 +1,50 @@
+@type article
+@title Plain Text as a Publishing Format
+@summary The advantages of keeping content portable, readable, and independent from the software that publishes it.
+@date 10/15/2026
+@author John Doe
+@handle plain-text-publishing
+
+# Plain Text as a Publishing Format
+
+I like content that remains useful even when the software around it disappears.
+
+That is one of the strongest arguments for keeping writing in plain text.
+
+A text file can be opened almost anywhere. It can be searched with ordinary tools, stored in Git, reviewed as a diff, copied between systems, and understood without launching a particular application.
+
+## Separate Content From Presentation
+
+When content is stored separately from its presentation, the same source can be rendered in different ways.
+
+A short article might become an HTML page today and part of an archive tomorrow. The underlying text does not need to change just because the presentation does.
+
+This separation also makes redesigns easier. Changing a stylesheet is much simpler than rewriting years of content to fit a new page structure.
+
+## Human-Readable Source
+
+I think source files should be pleasant to read directly.
+
+A lightweight markup language works well because formatting remains visible without overwhelming the writing itself.
+
+For example, a heading still looks like a heading. A link is still recognizable as a link. The document does not become a wall of tags or configuration.
+
+That makes the source useful beyond the build tool that processes it.
+
+## Version Control Becomes More Useful
+
+Plain text works especially well with Git.
+
+Changes are easy to inspect. A rewritten sentence appears as a rewritten sentence rather than a change buried inside serialized application data.
+
+For a personal site, that means the history of the repository can also become the history of the writing.
+
+## Durable by Default
+
+Publishing systems come and go.
+
+Text files are unlikely to become difficult to open.
+
+That durability is one reason I prefer generating conventional web output rather than requiring a runtime application to serve every page.
+
+The same principle applies to the final site, which I discuss in [Building Smaller Websites](::building-smaller-websites).
