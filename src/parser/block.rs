@@ -9,6 +9,7 @@ use crate::{
 pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
     let mut blocks: Vec<Block> = Vec::new();
     let mut index = 0;
+    let mut last_heading_level = 0;
 
     while index < lines.len() {
         let line = lines[index];
@@ -35,6 +36,15 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
                     index + 1
                 )));
             }
+            if count > last_heading_level + 1 {
+                return Err(QFError::Message(format!(
+                    "line {}: Headers cannot skip levels, expected level {} but found level {}",
+                    index + 1,
+                    last_heading_level + 1,
+                    count
+                )));
+            }
+            last_heading_level = count;
             blocks.push(Block::Heading {
                 level: count as u8,
                 content: inline::parse(trimmed[count + 1..].trim()),
