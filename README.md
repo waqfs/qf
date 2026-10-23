@@ -93,5 +93,17 @@ Supported `<command>`'s:
 - `init`: initiate a new portfolio in the current directory, or in the `--root` directory
 - `build`: run the build step, parsing and converting `.qf` files, and building the `dist/` directory
 
+#### Example
+There is an included AI-generated demo portfolio in this repository to showcase the structure, features, and outputs. Simply point the build to the `example` directory:
+```zsh
+cargo run build --root example
+```
+
+Then serve using your favorite tool, like:
+```zsh
+python3 -m http.server 8080 -d example/dist
+npx serve example/dist
+```
+
 ### License
 This project is licensed under GNU GPLv3, so you can use this for whatever, and forks must disclose source and be under the same license. Not that anybody actually gives a shit about code licensing.
