@@ -13,6 +13,7 @@ use crate::{cli::CLIArguments, error::QFError};
 #[derive(Debug)]
 enum Command {
     Build(CLIArguments),
+    Init(CLIArguments),
 }
 
 fn parse_command() -> Result<Command, QFError> {
@@ -37,6 +38,7 @@ fn parse_command() -> Result<Command, QFError> {
     let cli_arguments = CLIArguments { root };
     match command_raw.as_str() {
         "build" => Ok(Command::Build(cli_arguments)),
+        "init" => Ok(Command::Init(cli_arguments)),
         _ => Err(QFError::Message(format!("Unknown command: {command_raw}"))),
     }
 }
@@ -51,6 +53,7 @@ fn main() {
     };
     if let Err(error) = match command {
         Command::Build(arguments) => cli::build::run(arguments),
+        Command::Init(arguments) => cli::build::init(arguments),
     } {
         eprintln!("Error: {error}");
         exit(1);
