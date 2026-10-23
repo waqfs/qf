@@ -2,7 +2,30 @@
 @title My Portfolio
 @summary A showcase of my work and projects
 
-# My Portfolio
+# About Me
 
-[https://github.com/waqfs/qf](https://github.com/waqfs/qf)
+Something interesting about myself, my background, and my skills. An introduction to who I am and what I do. How I got into my field, what motivates me, and what I am passionate about.
 
+# Professional Experience
+
+1. Worked somewhere, doing something important.
+2. Describe your role, responsibilities, and achievements in this position.
+3. Highlight any significant projects or contributions you made.
+
+# Education
+
+1. Where I studied, what degree I earned, and any relevant coursework or honors.
+2. Mention any extracurricular activities or leadership roles you held during your education.
+
+# Projects
+
+1. Projects I have worked on, including personal projects, open-source contributions, or freelance work.
+2. Describe each of them briefly, or use an `@projects` block and build individual pages for each project.
+3. Keep the descriptions concise and focused on the impact or results of the projects.
+
+# Articles
+
+1. Any articles, blog posts, or publications I have written.
+2. Use an `@articles` block to automatically list out your articles.
+
+See more: [https://github.com/waqfs/qf](https://github.com/waqfs/qf)
