@@ -238,11 +238,10 @@ fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
                         .summary
                         .as_ref()
                         .map(|v| Inline::Span(v.clone())),
-                    MetadataFields::Date => document
-                        .metadata
-                        .date
-                        .as_ref()
-                        .map(|v| Inline::Span(v.to_rfc2822())),
+                    MetadataFields::Date => document.metadata.date.as_ref().map(|v| Inline::Time {
+                        datetime: *v,
+                        display: v.format("%m/%d/%Y").to_string(),
+                    }),
                 };
                 if let Some(value) = value {
                     if !item.is_empty() {

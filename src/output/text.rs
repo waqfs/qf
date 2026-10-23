@@ -130,6 +130,12 @@ fn write_inlines(inlines: &[Inline], output: &mut String) {
                 output.push_str(href);
                 output.push(')');
             }
+            Inline::Time {
+                datetime: _,
+                display,
+            } => {
+                output.push_str(display);
+            }
         }
     }
 }

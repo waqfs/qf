@@ -209,6 +209,13 @@ fn write_inline(inlines: &[Inline], output: &mut String) {
                 write_inline(label, output);
                 output.push_str("</a>");
             }
+            Inline::Time { datetime, display } => {
+                output.push_str(&format!(
+                    "<time datetime=\"{}\">{}</time>",
+                    html_escape_attribute(&datetime.to_rfc3339()),
+                    html_escape(display)
+                ));
+            }
         }
     }
 }

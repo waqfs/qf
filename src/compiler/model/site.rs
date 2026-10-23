@@ -84,7 +84,14 @@ pub enum Inline {
     Emphasis(Vec<Inline>),
     Strong(Vec<Inline>),
     Code(String),
-    Link { label: Vec<Inline>, href: String },
+    Time {
+        datetime: DateTime<Utc>,
+        display: String,
+    },
+    Link {
+        label: Vec<Inline>,
+        href: String,
+    },
 }
 
 #[derive(Debug, Clone)]
