@@ -35,3 +35,6 @@ jobs:
 
       - name: Build release binary
         run: cargo build --release --locked
+
+      - name: Test
+        run: cargo test --locked
