@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x86_64
+            runner: ubuntu-24.04
+            asset: linux-x86_64
+            exe: ""
+            archive: tar.gz
+
+          - name: Linux ARM64
+            runner: ubuntu-24.04-arm
+            asset: linux-aarch64
+            exe: ""
+            archive: tar.gz
+
+          - name: macOS x86_64
+            runner: macos-15-intel
+            asset: macos-x86_64
+            exe: ""
+            archive: tar.gz
+
+          - name: macOS ARM64
+            runner: macos-15
+            asset: macos-aarch64
+            exe: ""
+            archive: tar.gz
+
+          - name: Windows x86_64
+            runner: windows-2025
+            asset: windows-x86_64
+            exe: ".exe"
+            archive: zip
+
+          - name: Windows ARM64
+            runner: windows-11-arm
+            asset: windows-aarch64
+            exe: ".exe"
+            archive: zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Validate release tag
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Release tag must have the form vX.Y.Z, got: $env:GITHUB_REF_NAME"
+          }
+
+      - name: Install Rust stable
+        shell: pwsh
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Build release binary
+        run: cargo build --release --locked --bin qf
+
+      - name: Verify binary version
+        shell: pwsh
+        run: |
+          $expected = $env:GITHUB_REF_NAME.Substring(1)
+          $binary = Join-Path $PWD "target/release/qf${{ matrix.exe }}"
+
+          $output = (& $binary --version | Out-String).Trim()
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "qf --version exited with code $LASTEXITCODE"
+          }
+
+          $actual = ($output -split '\s+')[-1]
+
+          Write-Host "Tag version:    $expected"
+          Write-Host "Binary output:  $output"
+          Write-Host "Binary version: $actual"
+
+          if ($actual -ne $expected) {
+            throw "Version mismatch: tag is v$expected but binary reports $actual"
+          }
+
+      - name: Package binary
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+
+          $version = $env:GITHUB_REF_NAME
+          $platform = "${{ matrix.asset }}"
+          $binary = "target/release/qf${{ matrix.exe }}"
+
+          if ("${{ matrix.archive }}" -eq "zip") {
+            $archive = "dist/qf-$version-$platform.zip"
+
+            Compress-Archive `
+              -Path $binary `
+              -DestinationPath $archive
+          }
+          else {
+            $archive = "dist/qf-$version-$platform.tar.gz"
+
+            tar `
+              -C target/release `
+              -czf $archive `
+              qf
+          }
+
+          Write-Host "Created $archive"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: qf-${{ github.ref_name }}-${{ matrix.asset }}
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          echo "Release assets:"
+          ls -lah dist/
+
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release already exists; replacing assets."
+            gh release upload \
+              "$GITHUB_REF_NAME" \
+              dist/* \
+              --clobber
+          else
+            gh release create \
+              "$GITHUB_REF_NAME" \
+              dist/* \
+              --verify-tag \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes
+          fi
