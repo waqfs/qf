@@ -116,6 +116,26 @@ fn valid() {
 fn invalid() {
     let cases = [
         (
+            "decorative-alt-caption",
+            &vec![S::Decorative, S::Alt, S::Caption],
+            "Image already marked decorative and cannot have an alt description",
+        ),
+        (
+            "decorative-caption-alt",
+            &vec![S::Decorative, S::Caption, S::Alt],
+            "Image already marked decorative and cannot have a caption",
+        ),
+        (
+            "alt-caption-decorative",
+            &vec![S::Alt, S::Caption, S::Decorative],
+            "Image already has an alt description and cannot be marked decorative",
+        ),
+        (
+            "caption-alt-decorative",
+            &vec![S::Caption, S::Alt, S::Decorative],
+            "Image already has an alt description and cannot be marked decorative",
+        ),
+        (
             "decorative-alt",
             &vec![S::Decorative, S::Alt],
             "Image already marked decorative and cannot have an alt description",
