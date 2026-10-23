@@ -10,19 +10,19 @@ pub fn parse(input: &str) -> Vec<Inline> {
                 nodes.extend(parse_styles(&rest[..start]));
             }
             let link = &rest[start..];
-            if let Some(label_end) = link.find("](") {
-                if let Some(url_end) = link[label_end + 2..].find(')') {
-                    let label = &link[1..label_end];
-                    let start = label_end + 2;
-                    let end = start + url_end;
-                    let url = &link[start..end];
-                    nodes.push(Inline::Link {
-                        label: parse_styles(label),
-                        href: url.to_string(),
-                    });
-                    rest = &link[end + 1..];
-                    continue;
-                }
+            if let Some(label_end) = link.find("](")
+                && let Some(url_end) = link[label_end + 2..].find(')')
+            {
+                let label = &link[1..label_end];
+                let start = label_end + 2;
+                let end = start + url_end;
+                let url = &link[start..end];
+                nodes.push(Inline::Link {
+                    label: parse_styles(label),
+                    href: url.to_string(),
+                });
+                rest = &link[end + 1..];
+                continue;
             }
             nodes.push(Inline::Text("[".to_string()));
             rest = &link[1..];

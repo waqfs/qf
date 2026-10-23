@@ -15,10 +15,6 @@ use crate::{
 pub struct RSSOutputFormatter;
 
 impl OutputFormatter for RSSOutputFormatter {
-    fn name(&self) -> &'static str {
-        "rss"
-    }
-
     fn write(&self, site: &Site, config: &Config, stage: &Path) -> Result<(), QFError> {
         let mut documents: Vec<&Document> = Vec::new();
         if let Some(index) = site.article_index {

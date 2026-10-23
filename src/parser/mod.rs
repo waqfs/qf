@@ -11,13 +11,13 @@ use crate::{
 
 pub fn parse_document(file: &PortfolioFile, config: &Config) -> Result<Document, QFError> {
     let lines: Vec<&str> = file.raw.lines().collect();
-    let (metadata, next_pos) = metadata::parse(&lines, &config)?;
+    let (metadata, next_pos) = metadata::parse(&lines, config)?;
     let blocks = block::parse(&lines[next_pos..])?;
     Ok(Document {
         source_path: file.path.clone(),
-        metadata: metadata,
+        metadata,
         route: String::new(),
-        blocks: blocks,
+        blocks,
         next: None,
         all: None,
         previous: None,

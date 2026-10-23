@@ -73,7 +73,7 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
 
         // Quotes
         if let Some(value) = trimmed.strip_prefix("> ") {
-            blocks.push(Block::BlockQuote(inline::parse(value)));
+            blocks.push(Block::Quote(inline::parse(value)));
             index += 1;
             continue;
         }
@@ -102,7 +102,7 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
                 )));
             }
             index += 1;
-            blocks.push(Block::CodeBlock { language, code });
+            blocks.push(Block::Code { language, code });
             continue;
         }
 
@@ -213,7 +213,7 @@ fn parse_linked_index(text: &str, line: usize) -> Result<LinkedIndex, QFError> {
         match key {
             "limit" => {
                 if value.is_empty() || !value.chars().all(|chr| chr.is_ascii_digit()) {
-                    return Err(error(format!("key 'limit' requires positive integer")));
+                    return Err(error("key 'limit' requires positive integer".into()));
                 }
                 index.limit =
                     Some(value.parse().map_err(|err| {
@@ -241,7 +241,7 @@ fn parse_linked_index(text: &str, line: usize) -> Result<LinkedIndex, QFError> {
                         }
                     };
                     if index.fields.contains(&field) {
-                        return Err(error(format!("key 'fields' has duplicate value")));
+                        return Err(error("key 'fields' has duplicate value".into()));
                     }
                     index.fields.push(field);
                 }

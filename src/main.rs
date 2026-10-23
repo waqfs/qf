@@ -6,7 +6,7 @@ mod output;
 mod parser;
 mod staging;
 
-use std::{env, eprintln, path::PathBuf, process::exit};
+use std::{env, eprintln, path::PathBuf, println, process::exit};
 
 use crate::{cli::CLIArguments, error::QFError};
 
@@ -39,6 +39,14 @@ fn parse_command() -> Result<Command, QFError> {
     match command_raw.as_str() {
         "build" => Ok(Command::Build(cli_arguments)),
         "init" => Ok(Command::Init(cli_arguments)),
+        "--version" => {
+            println!(
+                "{} version {}",
+                env!("CARGO_PKG_NAME"),
+                env!("CARGO_PKG_VERSION")
+            );
+            exit(0);
+        }
         _ => Err(QFError::Message(format!("Unknown command: {command_raw}"))),
     }
 }

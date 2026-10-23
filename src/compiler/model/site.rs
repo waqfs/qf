@@ -55,8 +55,8 @@ pub enum Block {
     },
     UnorderedList(Vec<Vec<Inline>>),
     OrderedList(Vec<Vec<Inline>>),
-    BlockQuote(Vec<Inline>),
-    CodeBlock {
+    Quote(Vec<Inline>),
+    Code {
         language: Option<String>,
         code: String,
     },
