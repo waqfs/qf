@@ -1,4 +1,4 @@
-mod block;
+pub mod block;
 pub mod date;
 mod inline;
 mod metadata;

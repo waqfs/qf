@@ -1,6 +1,7 @@
 use core::fmt;
 use std::io;
 
+#[derive(Debug)]
 pub enum QFError {
     Io(io::Error),
     Message(String),
