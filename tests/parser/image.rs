@@ -60,8 +60,8 @@ fn assert_caption(image: &Image, caption: Option<String>) {
 }
 
 #[test]
-fn valid_decorative() {
-    let blocks = parse(&lines(include_str!("fixture/image_valid_decorative.txt")));
+fn decorative() {
+    let blocks = parse(&lines(include_str!("fixture/image_decorative.txt")));
     assert!(blocks.is_ok(), "expected parse to succeed");
 
     let image = assert_image(blocks.unwrap());
