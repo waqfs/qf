@@ -3,7 +3,7 @@ mod compiler;
 mod config;
 mod error;
 mod output;
-mod parser;
+pub mod parser;
 mod staging;
 
 use std::{env, eprintln, path::PathBuf, println, process::exit};
@@ -51,7 +51,7 @@ fn parse_command() -> Result<Command, QFError> {
     }
 }
 
-fn main() {
+pub fn entrypoint() {
     let command = match parse_command() {
         Ok(command) => command,
         Err(error) => {
