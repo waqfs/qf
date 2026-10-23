@@ -64,7 +64,7 @@ pub fn build_index(
     })
 }
 
-pub fn process_index(site: &mut Site) -> Result<(), QFError> {
+pub fn process_index(config: &Config, site: &mut Site) -> Result<(), QFError> {
     site.articles.sort_by(|a, b| {
         parser::date::sort(
             site.documents[*a].metadata.date,
@@ -112,7 +112,7 @@ pub fn process_index(site: &mut Site) -> Result<(), QFError> {
             .enumerate()
             .filter_map(|(pos, block)| match block {
                 Block::LinkedIndex(linked_index) => {
-                    Some((pos, build_local_index(site, linked_index)))
+                    Some((pos, build_local_index(config, site, linked_index)))
                 }
                 _ => None,
             })
@@ -201,7 +201,7 @@ fn parse_handle(handle: &str) -> Handle {
     }
 }
 
-fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
+fn build_local_index(config: &Config, site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
     let indexed_documents = match index.doc_type {
         DocumentType::Article => &site.articles,
         DocumentType::Project => &site.projects,
@@ -240,7 +240,7 @@ fn build_local_index(site: &Site, index: &LinkedIndex) -> Vec<Vec<Inline>> {
                         .map(|v| Inline::Span(v.clone())),
                     MetadataFields::Date => document.metadata.date.as_ref().map(|v| Inline::Time {
                         datetime: *v,
-                        display: v.format("%m/%d/%Y").to_string(),
+                        display: v.format(&config.date_format).to_string(),
                     }),
                 };
                 if let Some(value) = value {
