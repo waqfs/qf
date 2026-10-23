@@ -129,7 +129,15 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
                                 index + 1
                             )));
                         }
-                        None => alt = Some(ImageAlt::Decorative),
+                        None => {
+                            if caption.is_some() {
+                                return Err(QFError::Message(format!(
+                                    "line {}: Image already has a caption and cannot be marked decorative",
+                                    index + 1
+                                )));
+                            }
+                            alt = Some(ImageAlt::Decorative)
+                        }
                     }
                 } else if let Some(value) = parse_image_property(property, "alt") {
                     match alt {
@@ -156,6 +164,12 @@ pub fn parse(lines: &[&str]) -> Result<Vec<Block>, QFError> {
                         }
                     }
                 } else if let Some(value) = parse_image_property(property, "caption") {
+                    if let Some(ImageAlt::Decorative) = alt {
+                        return Err(QFError::Message(format!(
+                            "line {}: Image already marked decorative and cannot have a caption",
+                            index + 1
+                        )));
+                    }
                     if caption.is_some() {
                         return Err(QFError::Message(format!(
                             "line {}: Image cannot have multiple captions",
