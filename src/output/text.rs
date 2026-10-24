@@ -36,14 +36,14 @@ impl OutputFormatter for TextOutputFormatter {
                 write_block(block, &mut text);
             }
 
-            if let Some(route) = &document.next {
-                text.push_str(&format!("Next: {}\n", route));
+            if let Some(handle) = &document.next {
+                text.push_str(&format!("Next: {}\n", handle.route));
             }
             if let Some(route) = &document.all {
                 text.push_str(&format!("All: {}\n", route));
             }
-            if let Some(route) = &document.previous {
-                text.push_str(&format!("Previous: {}\n", route));
+            if let Some(handle) = &document.previous {
+                text.push_str(&format!("Previous: {}\n", handle.route));
             }
 
             fs::write(dir.join("index.txt"), text)?;
