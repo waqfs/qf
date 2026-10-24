@@ -35,9 +35,9 @@ pub struct Document {
     pub metadata: Metadata,
     pub route: String,
     pub blocks: Vec<Block>,
-    pub next: Option<String>,
+    pub next: Option<DocumentHandle>,
     pub all: Option<String>,
-    pub previous: Option<String>,
+    pub previous: Option<DocumentHandle>,
 }
 
 #[derive(Debug, Clone)]

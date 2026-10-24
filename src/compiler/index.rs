@@ -78,16 +78,32 @@ pub fn process_index(config: &Config, site: &mut Site) -> Result<(), QFError> {
         )
     });
 
-    let article_routes: Vec<String> = site
+    let article_routes: Vec<DocumentHandle> = site
         .articles
         .iter()
-        .map(|index| site.documents[*index].route.clone())
+        .map(|index| DocumentHandle {
+            title: site.documents[*index].metadata.title.clone(),
+            route: site.documents[*index].route.clone(),
+            handle: site.documents[*index]
+                .metadata
+                .handle
+                .clone()
+                .unwrap_or_default(),
+        })
         .collect();
 
-    let project_routes: Vec<String> = site
+    let project_routes: Vec<DocumentHandle> = site
         .projects
         .iter()
-        .map(|index| site.documents[*index].route.clone())
+        .map(|index| DocumentHandle {
+            title: site.documents[*index].metadata.title.clone(),
+            route: site.documents[*index].route.clone(),
+            handle: site.documents[*index]
+                .metadata
+                .handle
+                .clone()
+                .unwrap_or_default(),
+        })
         .collect();
 
     for (pos, index) in site.articles.clone().into_iter().enumerate() {
