@@ -65,8 +65,9 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
         body.push_str("<nav aria-label=\"navigation\">\n");
         if let Some(handle) = &document.next {
             body.push_str(&format!(
-                "<a rel=\"next\" href=\"{}\">Next</a>\n",
-                html_escape_attribute(handle.route.as_str())
+                "<a rel=\"next\" href=\"{}\">Next - {}</a>\n",
+                html_escape_attribute(handle.route.as_str()),
+                html_escape(&handle.title)
             ));
         }
         if let Some(route) = &document.all {
@@ -77,8 +78,9 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
         }
         if let Some(handle) = &document.previous {
             body.push_str(&format!(
-                "<a rel=\"prev\" href=\"{}\">Previous</a>\n",
-                html_escape_attribute(handle.route.as_str())
+                "<a rel=\"prev\" href=\"{}\">Previous - {}</a>\n",
+                html_escape_attribute(handle.route.as_str()),
+                html_escape(&handle.title)
             ));
         }
         body.push_str("</nav>\n");
