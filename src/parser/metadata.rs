@@ -19,6 +19,7 @@ pub fn parse(lines: &[&str], config: &Config) -> Result<(Metadata, usize), QFErr
     let mut handle: Option<String> = None;
     let mut starred: bool = false;
     let mut is_index: bool = false;
+    let mut is_draft: bool = false;
     let mut index: usize = 0;
 
     while index < lines.len() {
@@ -88,6 +89,18 @@ pub fn parse(lines: &[&str], config: &Config) -> Result<(Metadata, usize), QFErr
                     }
                 }
             }
+            "draft" => {
+                is_draft = match value.trim() {
+                    "true" => true,
+                    "false" => false,
+                    unknown => {
+                        return Err(QFError::Message(format!(
+                            "line {}: Unknown draft type {unknown}",
+                            index + 1
+                        )));
+                    }
+                }
+            }
             unknown => {
                 return Err(QFError::Message(format!(
                     "line {}: Unknown metadata property {unknown}",
@@ -113,6 +126,7 @@ pub fn parse(lines: &[&str], config: &Config) -> Result<(Metadata, usize), QFErr
             handle,
             starred,
             is_index,
+            is_draft,
         },
         index,
     ))
