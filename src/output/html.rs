@@ -50,7 +50,7 @@ fn write_document(document: &Document, site: &Site, config: &Config) -> String {
         body.push_str(&format!(
             "<time datetime=\"{}\">{}</time>\n",
             html_escape_attribute(date.to_rfc3339().as_str()),
-            html_escape(&date.format("%m/%d/%Y").to_string())
+            html_escape(&date.format(&config.date_format).to_string())
         ));
     }
     if let Some(author) = &document.metadata.author {
@@ -208,6 +208,13 @@ fn write_inline(inlines: &[Inline], output: &mut String) {
                 output.push_str(&format!("<a href=\"{}\">", html_escape_attribute(href)));
                 write_inline(label, output);
                 output.push_str("</a>");
+            }
+            Inline::Time { datetime, display } => {
+                output.push_str(&format!(
+                    "<time datetime=\"{}\">{}</time>",
+                    html_escape_attribute(&datetime.to_rfc3339()),
+                    html_escape(display)
+                ));
             }
         }
     }

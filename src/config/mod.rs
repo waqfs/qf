@@ -24,6 +24,9 @@ pub struct Config {
 
     #[serde(default = "default_static_dir")]
     pub static_dir: PathBuf,
+
+    #[serde(default = "default_date_format")]
+    pub date_format: String,
 }
 
 fn default_language() -> String {
@@ -40,6 +43,10 @@ fn default_output_dir() -> PathBuf {
 
 fn default_static_dir() -> PathBuf {
     PathBuf::from("static")
+}
+
+fn default_date_format() -> String {
+    "%B %-d, %Y".to_string()
 }
 
 impl Config {
