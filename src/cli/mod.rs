@@ -5,4 +5,5 @@ pub mod build;
 #[derive(Debug, Clone)]
 pub struct CLIArguments {
     pub root: PathBuf,
+    pub include_drafts: bool,
 }
