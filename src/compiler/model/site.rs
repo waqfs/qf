@@ -19,6 +19,7 @@ pub struct Metadata {
     pub handle: Option<String>,
     pub starred: bool,
     pub is_index: bool,
+    pub is_draft: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

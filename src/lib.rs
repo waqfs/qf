@@ -23,6 +23,7 @@ fn parse_command() -> Result<Command, QFError> {
         .ok_or_else(|| QFError::Message("Missing command argument.".to_string()))?;
 
     let mut root = PathBuf::from(".");
+    let mut include_drafts: bool = false;
     while let Some(arg) = arguments.next() {
         match arg.as_str() {
             "--root" => {
@@ -31,11 +32,17 @@ fn parse_command() -> Result<Command, QFError> {
                     .ok_or_else(|| QFError::Message("--root requires a path".to_string()))?;
                 root = PathBuf::from(value);
             }
+            "--drafts" => {
+                include_drafts = true;
+            }
             unknown => return Err(QFError::Message(format!("unknown argument: {unknown}"))),
         }
     }
 
-    let cli_arguments = CLIArguments { root };
+    let cli_arguments = CLIArguments {
+        root,
+        include_drafts,
+    };
     match command_raw.as_str() {
         "build" => Ok(Command::Build(cli_arguments)),
         "init" => Ok(Command::Init(cli_arguments)),

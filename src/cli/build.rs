@@ -7,7 +7,7 @@ const DEFAULT_STYLESHEET: &str = include_str!("default/style.css");
 const DEFAULT_INDEX: &str = include_str!("default/index.qf");
 
 pub fn run(arguments: CLIArguments) -> Result<(), QFError> {
-    compiler::build(&arguments.root)?;
+    compiler::build(&arguments)?;
     Ok(())
 }
 
